@@ -24,8 +24,51 @@ public class MainEntry {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainEntry.class);
 
     public static void main(String[] args) throws IOException, JSONException {
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings";
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/AboutPage.js";  //done
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/BeginnerGuidePage.js";  //done
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/BrushHeadDetailPage.js";  //done
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/DFUPage.js";  //done
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/HealthKnowledgePage.js";  //done
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/HistoryPage.js";  //done
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/HistoryReportPage.js";  //done
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/HomePage.js";  //done
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/IntroducePlaquePage.js";  //done
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/LastBrushDataDeatilPage.js";  //done
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/PersonalSettingPage.js";  //done
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/QuickGuidPage.js";  //done
+        //todo 这个文件的格式获取到的结果有问题
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/SettingPage.js";  // todo
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/WhyReplaceBrushheadPage.js";  //done
+        // todo 文件获取的格式有问题
+        String filePath="/Users/huamiumiu/Desktop/rn框架/Other.js";    //todo
+
+
+
+//        String  filePath = "/Users/huamiumiu/Desktop/rn框架/MHLocalizableString.js";
+//        String  filePath = "/Users/huamiumiu/Desktop/rn框架/pro/Base-EN.js";
+
         List list = new ArrayList();
-        getSubString(string1,list);
+        List fileStringToList = new ArrayList();
+        List fileStringToListTmp = new ArrayList();
+        List fileList = Utils.getAllDirsAndFiles(list,new File(filePath),"js");
+        LOGGER.info("all fileList is:{}",fileList);
+        //对每个文件进行处理
+        for(int i=0;i<fileList.size();i++) {
+            Map <String,JSONObject> map = new HashMap();
+            LOGGER.info("current fileList is当前文件路径：{}",fileList.get(i).toString());
+            String file = Utils.getStringFileFromPath(fileList.get(i).toString());
+            fileStringToList = Utils.convertStringFileToListFile(fileStringToListTmp,file);
+            LOGGER.info("fileStringToList is:",fileStringToList);
+            Utils.parseFileList(fileStringToList);
+
+        }
+
+
+
+
+
+
         System.out.println(list);
     }
 
