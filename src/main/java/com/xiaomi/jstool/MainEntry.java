@@ -48,25 +48,58 @@ public class MainEntry {
 //        String  filePath = "/Users/huamiumiu/Desktop/rn框架/MHLocalizableString.js";
 //        String  filePath = "/Users/huamiumiu/Desktop/rn框架/pro/Base-EN.js";
 
+        Utils utils = new Utils();
+        Map <String,JSONObject> map = new HashMap();
         List list = new ArrayList();
         List fileStringToList = new ArrayList();
         List fileStringToListTmp = new ArrayList();
         List fileList = Utils.getAllDirsAndFiles(list,new File(filePath),"js");
         LOGGER.info("all fileList is:{}",fileList);
+
         //对每个文件进行处理
         for(int i=0;i<fileList.size();i++) {
-            Map <String,JSONObject> map = new HashMap();
-            LOGGER.info("current fileList is当前文件路径：{}",fileList.get(i).toString());
-            String file = Utils.getStringFileFromPath(fileList.get(i).toString());
-            fileStringToList = Utils.convertStringFileToListFile(fileStringToListTmp,file);
-            LOGGER.info("fileStringToList is:",fileStringToList);
-            Utils.parseFileList(fileStringToList);
+            Map <String,JSONObject> stringsMap = new HashMap();
+            Map <String,Integer> exportStringsMap = new HashMap();
+            Map <String,JSONObject> zhHantMapTmp = new HashMap();
+            Map <String,JSONObject> zhHantMap = new HashMap();
 
+            exportStringsMap.put("stringsExport",0);
+            List  stringsList = new ArrayList();
+            List zhHantList = new ArrayList();
+            List foreignList = new ArrayList();
+            List fantiCNList = new ArrayList();
+            List mapList = new ArrayList();
+            //选取其中的一个文件
+            LOGGER.info("当前文件为：{}",fileList.get(i).toString());
+            //将文件转化为string格式来处理
+            String fileStringResult  = Utils.getStringFileFromPath(fileList.get(i).toString());
+            //将字符串按照格式，划分为stringsList,zhHantList
+           Utils.convertStringFileToListFile(stringsList,zhHantList,fileStringResult,exportStringsMap);
+           if(zhHantList.size()==stringsList.size() || stringsList.size()==exportStringsMap.get("stringsExport")){
+               for(int t=0;t<stringsList.size();t++) {
+//               for(int t=0;t<1;t++) {
+                   Map<String, JSONObject> mapTmp = new HashMap();
+                   String strTmp = stringsList.get(t).toString();
+                   //去掉最外层大括号,首位从第一位开始
+                   String str = strTmp.substring(1, strTmp.lastIndexOf("}")).trim();
+                   Utils.parseStringToList(str, foreignList, fantiCNList);
+
+                   zhHantMap = utils.parseHantStringToMap(zhHantList, zhHantMapTmp);
+                   for(Map.Entry entry:zhHantMap.entrySet()){
+                       System.out.println("=========================");
+                       System.out.println("key is "+entry.getKey()+"value is "+entry.getValue());
+                   }
+                   map = utils.parseStringsToMap(foreignList, fantiCNList, mapTmp, zhHantMap);
+                   for(String key:map.keySet()){
+                       System.out.println("key: "+key+"value:"+map.get(key));
+                   }
+                   mapList.add(map);
+               }
+
+           }else {
+               LOGGER.error("文件的格式不对称");
+           }
         }
-
-
-
-
 
 
         System.out.println(list);
@@ -100,7 +133,10 @@ public class MainEntry {
     }
     @Test
     public void test01(){
-        System.out.println(StringUtils.remove("abcdef","abc"));
+        String s1= "01234567";
+        String s2 ="12";
+//        StringUtils.remove(s1,s2);
+        System.out.println(StringUtils.remove(s1,s2));
     }
 
 
