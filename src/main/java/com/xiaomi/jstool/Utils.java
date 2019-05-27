@@ -174,11 +174,10 @@ public class Utils {
                 LOGGER.info("fantiCNString is {}", fantiCNString);
                 //取地域
                 String mapKey = fantiCNString.substring(0, fantiCNString.indexOf(":")).replace("\"", "").trim();
-                String valueString = fantiCNString.substring(fantiCNString.indexOf(":")).trim();
+                String valueString = fantiCNString.substring(fantiCNString.indexOf(":")).replace(":","").trim();
                 LOGGER.info("======fanti mapKey is {}", mapKey);
                 LOGGER.info("======fanti valueString is {}", valueString);
                 LOGGER.info("======zhHantMap.get(valueString) is {}", zhHantMap.get(valueString));
-
                 stringsMap.put(mapKey, zhHantMap.get(valueString));
             }
         } else {
@@ -192,9 +191,9 @@ public class Utils {
 
     //对zh_Hant的结构进行处理，存到JSONObject和map里面去
     public Map parseHantStringToMap(List zhHantList, Map<String, JSONObject> zhHantMap) throws JSONException {
-        JSONObject jsonObject = new JSONObject();
         if (zhHantList != null) {
             for (int p = 0; p < zhHantList.size(); p++) {
+                JSONObject jsonObject = new JSONObject();
                 String zhHant = zhHantList.get(p).toString();
                 String key = zhHant.substring(zhHant.indexOf("zh_Hant"), zhHant.indexOf("=")).replace("\"", "").trim();
                 String valueString = zhHant.substring(zhHant.indexOf("{"), zhHant.indexOf("}")).replace("{", "").trim();

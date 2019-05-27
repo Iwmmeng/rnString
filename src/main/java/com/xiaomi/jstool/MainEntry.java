@@ -1,6 +1,8 @@
 package com.xiaomi.jstool;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -41,7 +44,9 @@ public class MainEntry {
 //        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/SettingPage.js";  // todo
 //        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/WhyReplaceBrushheadPage.js";  //done
         // todo 文件获取的格式有问题
-        String filePath="/Users/huamiumiu/Desktop/rn框架/Other.js";    //todo
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/Other.js";    //todo
+        String filePath="/Users/huamiumiu/Desktop/rn框架/problem/SettingPage.js";    //todo
+
 
 
 
@@ -49,15 +54,17 @@ public class MainEntry {
 //        String  filePath = "/Users/huamiumiu/Desktop/rn框架/pro/Base-EN.js";
 
         Utils utils = new Utils();
-        Map <String,JSONObject> map = new HashMap();
+
         List list = new ArrayList();
         List fileStringToList = new ArrayList();
         List fileStringToListTmp = new ArrayList();
-        List fileList = Utils.getAllDirsAndFiles(list,new File(filePath),"js");
+        List<File> fileList = Utils.getAllDirsAndFiles(list,new File(filePath),"js");
         LOGGER.info("all fileList is:{}",fileList);
 
         //对每个文件进行处理
+        XSSFWorkbook workbook = new XSSFWorkbook();
         for(int i=0;i<fileList.size();i++) {
+            Map <String,JSONObject> map = new HashMap();
             Map <String,JSONObject> stringsMap = new HashMap();
             Map <String,Integer> exportStringsMap = new HashMap();
             Map <String,JSONObject> zhHantMapTmp = new HashMap();
@@ -68,7 +75,7 @@ public class MainEntry {
             List zhHantList = new ArrayList();
             List foreignList = new ArrayList();
             List fantiCNList = new ArrayList();
-            List mapList = new ArrayList();
+            List<Map<String,JSONObject>> mapList = new ArrayList();
             //选取其中的一个文件
             LOGGER.info("当前文件为：{}",fileList.get(i).toString());
             //将文件转化为string格式来处理
@@ -83,7 +90,6 @@ public class MainEntry {
                    //去掉最外层大括号,首位从第一位开始
                    String str = strTmp.substring(1, strTmp.lastIndexOf("}")).trim();
                    Utils.parseStringToList(str, foreignList, fantiCNList);
-
                    zhHantMap = utils.parseHantStringToMap(zhHantList, zhHantMapTmp);
                    for(Map.Entry entry:zhHantMap.entrySet()){
                        System.out.println("=========================");
@@ -95,12 +101,27 @@ public class MainEntry {
                    }
                    mapList.add(map);
                }
+               System.out.println("》》》》》》》》mapList"+mapList);
 
            }else {
                LOGGER.error("文件的格式不对称");
            }
-        }
+            if (mapList.size()>1){
+                for(int num=0;num<mapList.size();num++){
+                    XSSFSheet sheet = workbook.createSheet(fileList.get(i).getName()+num);
+                    ExcelHelper.fillExcel(mapList.get(num),workbook,sheet);
 
+                }
+            }else if(mapList.size()==1){
+                XSSFSheet sheet = workbook.createSheet(fileList.get(i).getName());
+                ExcelHelper.fillExcel(mapList.get(0),workbook,sheet);
+            }else {
+                LOGGER.error("mapList is null,{} ",mapList);
+            }
+        }
+        String outPath = "/Users/huamiumiu/Desktop/rn框架/data.xls";
+        workbook.write(new FileOutputStream(outPath));
+        workbook.close();
 
         System.out.println(list);
     }
