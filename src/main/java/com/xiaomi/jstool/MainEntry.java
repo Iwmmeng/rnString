@@ -1,24 +1,14 @@
 package com.xiaomi.jstool;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +37,8 @@ public class MainEntry {
 //        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/WhyReplaceBrushheadPage.js";  //done
         // todo 文件获取的格式有问题
 //        String filePath="/Users/huamiumiu/Desktop/rn框架/problem/Other.js";    //todo
-        String filePath = "/Users/huamiumiu/Desktop/rn框架/problem/SettingPage.js";    //todo
+//        String filePath = "/Users/huamiumiu/Desktop/rn框架/problem/SettingPage.js";    //todo
+        String filePath = "/Users/huamiumiu/Desktop/rn框架/problem";    //todo
 
 
 //        String  filePath = "/Users/huamiumiu/Desktop/rn框架/MHLocalizableString.js";
@@ -85,7 +76,7 @@ public class MainEntry {
                     String strTmp = stringsList.get(t).toString();
                     //去掉最外层大括号,首位从第一位开始
                     String str = strTmp.substring(1, strTmp.lastIndexOf("}")).trim();
-                    Utils.parseStringToList(str, foreignList, fantiCNList);
+                    utils.parseStringToList(str, foreignList, fantiCNList);
                     //把zhHantList转换为zhHantMap<String, JSONObject>
                     zhHantMap = utils.parseHantStringToMap(zhHantList, zhHantMapTmp);
                     for (Map.Entry entry : zhHantMap.entrySet()) {

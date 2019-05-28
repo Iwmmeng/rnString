@@ -87,39 +87,66 @@ public class Utils {
     }
 
     //对strings里面的含有大括号的结构进行处理，存到list
-    public static void parseStringToList(String originStrings, List foreignList, List fantiCNList) {
+    public void parseStringToList(String originStrings, List foreignList, List fantiCNList) {
         String baseStr = null;
         String remove = null;
         String leftString = null;
         if (originStrings != null) {
             //去掉最外层的大括号,这个操作要放在外面做，因为调用了递归，在调用该方法之前，就需要保证该string是去了外层大括号的
 //            String originStrings = originStrings.substring(originStrings.indexOf("{"),originStrings.lastIndexOf("}")).replace("{","").trim();
-            if (originStrings.startsWith("\"zh-")) {
-                //对以zh-开头的做处理
-                baseStr = originStrings.substring(originStrings.indexOf("\""), originStrings.indexOf(","));
-                remove = originStrings.substring(originStrings.indexOf("\""), originStrings.indexOf(",")) + ",";
-                fantiCNList.add(baseStr);
-                LOGGER.info("fantiCNList is {}", fantiCNList);
-                StringUtils.remove(originStrings, remove);
-                leftString = StringUtils.remove(originStrings, remove).trim();
-                LOGGER.info("leftString={}", leftString);
-                parseStringToList(leftString, foreignList, fantiCNList);
-            } else if (originStrings.startsWith("\"")) {
-                baseStr = originStrings.substring(originStrings.indexOf("\""), originStrings.indexOf("},"));
-                remove = originStrings.substring(originStrings.indexOf("\""), originStrings.indexOf("}")) + "},";
-                String strPop = baseStr + "}";
-                leftString = StringUtils.remove(originStrings, remove).trim();
-                LOGGER.info("leftString={}", leftString);
-                foreignList.add(strPop);
-                LOGGER.info("foreignList is {}", foreignList);
-                parseStringToList(leftString, foreignList, fantiCNList);
-            } else {
-                LOGGER.info("stringsList is done");
+            for (int tmp = 0; ; tmp++) {
+                if (originStrings.startsWith("\"zh-")) {
+                    //对以zh-开头的做处理
+                    baseStr = originStrings.substring(originStrings.indexOf("\""), originStrings.indexOf(","));
+                    remove = originStrings.substring(originStrings.indexOf("\""), originStrings.indexOf(",")) + ",";
+                    fantiCNList.add(baseStr);
+                    LOGGER.info("fantiCNList is {}", fantiCNList);
+                    StringUtils.remove(originStrings, remove);
+                    originStrings = StringUtils.remove(originStrings, remove).trim();
+                    LOGGER.info("leftString={}", leftString);
+                } else if (originStrings.startsWith("\"")) {
+                    baseStr = originStrings.substring(originStrings.indexOf("\""), originStrings.indexOf("},"));
+                    remove = originStrings.substring(originStrings.indexOf("\""), originStrings.indexOf("}")) + "},";
+                    String strPop = baseStr + "}";
+                    originStrings = StringUtils.remove(originStrings, remove).trim();
+                    LOGGER.info("leftString={}", originStrings);
+                    foreignList.add(strPop);
+                    LOGGER.info("foreignList is {}", foreignList);
+                } else {
+                    LOGGER.info("stringsList is done");
+                    break;
+                }
             }
-        } else {
+        }else {
             LOGGER.info("originStrings is null");
         }
     }
+//            if (originStrings.startsWith("\"zh-")) {
+//                //对以zh-开头的做处理
+//                baseStr = originStrings.substring(originStrings.indexOf("\""), originStrings.indexOf(","));
+//                remove = originStrings.substring(originStrings.indexOf("\""), originStrings.indexOf(",")) + ",";
+//                fantiCNList.add(baseStr);
+//                LOGGER.info("fantiCNList is {}", fantiCNList);
+//                StringUtils.remove(originStrings, remove);
+//                leftString = StringUtils.remove(originStrings, remove).trim();
+//                LOGGER.info("leftString={}", leftString);
+//                parseStringToList(leftString, foreignList, fantiCNList);
+//            } else if (originStrings.startsWith("\"")) {
+//                baseStr = originStrings.substring(originStrings.indexOf("\""), originStrings.indexOf("},"));
+//                remove = originStrings.substring(originStrings.indexOf("\""), originStrings.indexOf("}")) + "},";
+//                String strPop = baseStr + "}";
+//                leftString = StringUtils.remove(originStrings, remove).trim();
+//                LOGGER.info("leftString={}", leftString);
+//                foreignList.add(strPop);
+//                LOGGER.info("foreignList is {}", foreignList);
+//                parseStringToList(leftString, foreignList, fantiCNList);
+//            } else {
+//                LOGGER.info("stringsList is done");
+//            }
+//        } else {
+//            LOGGER.info("originStrings is null");
+//        }
+//    }
 
     //  对strings的整体结构进行处理（包含直接引用和间接引用），存到JSONObject和map里面去
     public Map parseStringsToMap(List foreignList, List fantiCNList, Map<String, JSONObject> stringsMap, Map<String, JSONObject> zhHantMap) throws JSONException {

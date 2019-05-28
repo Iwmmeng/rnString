@@ -1,5 +1,6 @@
 package com.xiaomi.jstool;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -130,6 +131,20 @@ public class ExcelHelper {
         list .add(3);
         list .add(4);
         System.out.println(list.indexOf(3));
+
+    }
+    @Test
+    public void test05(){
+        String s = "zh123456string78922zh123";
+        for (int i=0;;i++){
+            if(s.startsWith("zh")){
+                s= StringUtils.remove(s,"zh");
+                System.out.println(s);
+            }else {
+                break;
+            }
+
+        }
 
     }
 

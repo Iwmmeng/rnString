@@ -1,14 +1,11 @@
 package com.xiaomi.jstool;
 
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +30,6 @@ public class ResultAnalyze {
         }
         LOGGER.info("jsonKeyList size is {},list is {}", jsonKeyList.size(), jsonKeyList);
         //对整体按照提取粗来的mapKey和jsonKey 来获取记录的值，表达出来
-
 
 //        Map<String, JSONObject> failResult = new HashMap<String, JSONObject>();
         int ZH = mapKeyList.indexOf("zh");
