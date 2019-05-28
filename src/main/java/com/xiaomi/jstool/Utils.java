@@ -22,8 +22,6 @@ public class Utils {
 
     //从路径获取文件
     public static String getStringFileFromPath(String filePath) throws IOException {
-        // filePath = "/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/AboutPage.js";
-
         LOGGER.info("get file from path {}", filePath);
         String fileStringResult = null;
         File file = new File(filePath);
@@ -42,18 +40,16 @@ public class Utils {
         }
         reader.close();
         fileStringResult = sb.toString();
-//        fileStringResult = sb.substring(sb.indexOf("(") + 1, sb.lastIndexOf("}") + 1).trim();
         LOGGER.info("get file StringResult: {}", fileStringResult);
         return fileStringResult;
     }
-
     /**
      * zh_Hant1 = {
      * tip_bluetoothNotOpen: "藍牙未打開",
      * tip_networkError: "網路異常，請檢查網路後重試",
      * alert_title_attention: "提醒",
      * }
-     * <p>
+     *
      * {
      * "en":{
      * tip_bluetoothNotOpen: "Bluetooth is off",
@@ -123,21 +119,7 @@ public class Utils {
         } else {
             LOGGER.info("originStrings is null");
         }
-//        if(originStrings.contains("},")){
-//            //去掉最外层的大括号
-//                String baseStr = originStrings.substring(originStrings.indexOf("\""),originStrings.indexOf("},"));
-//                String remove = originStrings.substring(originStrings.indexOf("\""),originStrings.indexOf("}"))+"},";
-//                String strPop = baseStr + "}";
-//                resultStringsList.add(strPop);
-//      String leftString = StringUtils.remove(originStrings, remove).trim();
-//      LOGGER.info("leftString={}", leftString);
-//      parseStringsToList(leftString,resultStringsList);
-//
-//            } else{
-//            LOGGER.info("string to list is done");
-//        }
     }
-
 
     //  对strings的整体结构进行处理（包含直接引用和间接引用），存到JSONObject和map里面去
     public Map parseStringsToMap(List foreignList, List fantiCNList, Map<String, JSONObject> stringsMap, Map<String, JSONObject> zhHantMap) throws JSONException {
@@ -149,12 +131,13 @@ public class Utils {
                 String mapKey = foreignString.substring(0, foreignString.indexOf(":{")).replace("\"", "").trim();
                 String valueString = foreignString.substring(foreignString.indexOf(":{"), foreignString.indexOf("}")).replace(":{", "");
                 LOGGER.info("=============valueString is {}", valueString);
-                String[] valueArr = valueString.split(",");
+                //todo update新的分割辅为"，
+                String[] valueArr = valueString.split("\",");
                 for (int k = 0; k < valueArr.length; k++) {
                     if (valueArr[k].contains(":")) {
                         LOGGER.info("第{}次循环", k);
                         String keyJson = valueArr[k].substring(0, valueArr[k].indexOf(":")).trim();
-                        String valueJson = valueArr[k].substring(valueArr[k].indexOf(":")).replace("\"", "").trim();
+                        String valueJson = valueArr[k].substring(valueArr[k].indexOf(":")).replace("\"", "").replace(":","").trim();
                         jsonObject.put(keyJson, valueJson);
                         LOGGER.info("stringsMap key is {}", mapKey);
                         LOGGER.info("stringsMap Json value is {}", jsonObject);
@@ -216,71 +199,6 @@ public class Utils {
         }
         return zhHantMap;
     }
-
-
-    //对每一个最小的单元进行处理
-    //对含有注释的进行处理
-    //对含有多个:的进行处理
-//    public static Map parseStringsToMap(List fileListResult) throws JSONException {
-//        if (fileListResult != null) {
-//            Map<String, JSONObject> map = new HashMap<String, JSONObject>();
-//            for (int i = 0; i < fileListResult.size(); i++) {
-//                JSONObject jsonObject = new JSONObject();
-//                LOGGER.info(">>>>>>>>>>>>>>>>>>>>>>>>开始第{}次，total次数：{}次<<<<<<<<<<<<<<<<<<<", i + 1, fileListResult.size());
-//                LOGGER.info("fileListResult is {}",fileListResult);
-//                LOGGER.info("current process file list is {}",fileListResult.get(i));
-//                String str = fileListResult.get(i).toString();
-//                LOGGER.info("str is {}",str);
-//                //获取地域国家,存为excel的0行属性头
-//                String titleRow = str.substring(str.indexOf("\""), str.indexOf("\":{")).replace("\"", "");
-//                LOGGER.info("titleRow:{}", titleRow);
-//                //获取国家后对应大括号的字段，存为JSONObject
-//                int tmp =str.indexOf(":{");
-//                System.out.println(tmp);
-//                int tmp2 = str.indexOf("}");
-//                System.out.println(tmp2);
-//                String string1= str.substring(str.indexOf(":{"), str.indexOf("}"));
-//                System.out.println("string1:"+string1);
-//                String string2 = string1.replace(":{", "");
-//                System.out.println("string2:"+string2);
-//                String sub = string2;
-//
-//
-////                String sub = str.substring(str.indexOf(":{"), str.indexOf("}")).replace(":{", "");
-//                LOGGER.info("sub:{}", sub);
-//                String[] stringArr = sub.split(",");
-//                for (String s : stringArr) {
-//                    if (s!=null) {
-//
-//                        String key = null;
-//                        String value = null;
-//                        //处理多冒号情况
-//                        if (StringUtils.countMatches(s, ":") > 1) {
-//                            key = s.substring(0, s.indexOf(":")).trim();
-//                            value = s.substring(s.indexOf("\""), s.lastIndexOf("\"")).replace("\"", "").trim();
-//                            LOGGER.info("多多多多多冒号处理了，key为" + key + ",value为" + value);
-//                        } else if (StringUtils.countMatches(s, ":") == 1) {
-//                            key = s.split(":")[0].trim();
-//                            value = s.split(":")[1].trim().replace("\"", "").trim();
-//                            LOGGER.info("单个冒号处理了，key为" + key + ",value为" + value);
-//                        } else {
-//                            LOGGER.info("不包含冒号{}", s);
-//                            continue;
-//                        }
-//                        jsonObject.put(key, value);
-//                    }
-//                }
-//                map.put(titleRow, jsonObject);
-//                LOGGER.info(">>>>>>>>>>>>>>>>>>>>>>>>");
-//                for (Map.Entry entry : map.entrySet()) {
-//                    LOGGER.info("entry.getKey: {} ,entry.getValue: {}", entry.getKey(), entry.getValue());
-//                }
-//            }
-//            return map;
-//        } else {
-//            return null;
-//        }
-//    }
 
     public static List<File> getAllDirsAndFiles(List fileNameList, File file, String xmlFileName) {
         if (file.exists() && file.isFile()) {
