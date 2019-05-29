@@ -19,7 +19,7 @@ public class MainEntry {
     public static Map<File, HashMap<String, JSONObject>> resultMap = new HashMap<File, HashMap<String, JSONObject>>();
 
     public static void main(String[] args) throws IOException, JSONException {
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings";
+        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings";
 //        String filePath = "/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/AboutPage.js";  //done
 //        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/BeginnerGuidePage.js";  //done
 //        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/BrushHeadDetailPage.js";  //done
@@ -38,7 +38,7 @@ public class MainEntry {
         // todo 文件获取的格式有问题
 //        String filePath="/Users/huamiumiu/Desktop/rn框架/problem/Other.js";    //todo
 //        String filePath = "/Users/huamiumiu/Desktop/rn框架/problem/SettingPage.js";    //todo
-        String filePath = "/Users/huamiumiu/Desktop/rn框架/problem";    //todo
+//        String filePath = "/Users/huamiumiu/Desktop/rn框架/problem";    //todo
 
 
 //        String  filePath = "/Users/huamiumiu/Desktop/rn框架/MHLocalizableString.js";
@@ -52,7 +52,7 @@ public class MainEntry {
             LOGGER.info("对第 {} 个文件进行处理，total is {}", i + 1, fileList.size());
             Utils utils = new Utils();
             Map<String, JSONObject> map = new HashMap();
-            Map<String, JSONObject> stringsMap = new HashMap();
+
             Map<String, Integer> exportStringsMap = new HashMap();
             Map<String, JSONObject> zhHantMapTmp = new HashMap();
             Map<String, JSONObject> zhHantMap = new HashMap();
@@ -60,7 +60,7 @@ public class MainEntry {
             exportStringsMap.put("stringsExport", 0);
             List stringsList = new ArrayList();
             List zhHantList = new ArrayList();
-            List foreignList = new ArrayList();
+//            List foreignList = new ArrayList();
             List fantiCNList = new ArrayList();
             List<Map<String, JSONObject>> mapList = new ArrayList();
             //选取其中的一个文件
@@ -69,26 +69,14 @@ public class MainEntry {
             String fileStringResult = Utils.getStringFileFromPath(fileList.get(i).toString());
             //将字符串按照格式，划分为stringsList,zhHantList
             Utils.convertStringFileToListFile(stringsList, zhHantList, fileStringResult, exportStringsMap);
-            if (zhHantList.size() == stringsList.size() || stringsList.size() == exportStringsMap.get("stringsExport")) {
+            if (zhHantList.size() == stringsList.size() && stringsList.size() == exportStringsMap.get("stringsExport")) {
                 for (int t = 0; t < stringsList.size(); t++) {
-//               for(int t=0;t<1;t++) {
-                    Map<String, JSONObject> mapTmp = new HashMap();
-                    String strTmp = stringsList.get(t).toString();
-                    //去掉最外层大括号,首位从第一位开始
-                    String str = strTmp.substring(1, strTmp.lastIndexOf("}")).trim();
-                    utils.parseStringToList(str, foreignList, fantiCNList);
-                    //把zhHantList转换为zhHantMap<String, JSONObject>
-                    zhHantMap = utils.parseHantStringToMap(zhHantList, zhHantMapTmp);
-                    for (Map.Entry entry : zhHantMap.entrySet()) {
-                        System.out.println("=========================");
-                        System.out.println("key is " + entry.getKey() + "value is " + entry.getValue());
-                    }
-                    //对String的格式做处理，且将zhHantMap<String, JSONObject>格式统统存到mp里面去
-                    map = utils.parseStringsToMap(foreignList, fantiCNList, mapTmp, zhHantMap);
-//                    for (String key : map.keySet()) {
-//                        System.out.println("key: " + key + "value:" + map.get(key));
-//                    }
-                    mapList.add(map);
+                    Map<String, JSONObject> stringsMap = new HashMap();
+                    String strSub = stringsList.get(t).toString();
+                    String zhHant = zhHantList.get(t).toString();
+                    List foreignList = utils.parseStringToList(strSub);
+                    utils.parseStringsToMap(foreignList,stringsMap,zhHant);
+                    mapList.add(stringsMap);
                 }
 //                System.out.println("》》》》》》》》mapList" + mapList);
 //                for(int k=0;k<mapList.size();k++){
