@@ -17,99 +17,76 @@ import java.util.Map;
 public class MainEntry {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainEntry.class);
     public static Map<File, HashMap<String, JSONObject>> resultMap = new HashMap<File, HashMap<String, JSONObject>>();
+    public static Map<File, JSONObject> resultMap2 = new HashMap<File, JSONObject>();
 
     public static void main(String[] args) throws IOException, JSONException {
-        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings";
-//        String filePath = "/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/AboutPage.js";  //done
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/BeginnerGuidePage.js";  //done
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/BrushHeadDetailPage.js";  //done
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/DFUPage.js";  //done
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/HealthKnowledgePage.js";  //done
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/HistoryPage.js";  //done
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/HistoryReportPage.js";  //done
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/HomePage.js";  //done
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/IntroducePlaquePage.js";  //done
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/LastBrushDataDeatilPage.js";  //done
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/PersonalSettingPage.js";  //done
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/QuickGuidPage.js";  //done
-        //todo 这个文件的格式获取到的结果有问题
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/SettingPage.js";  // todo
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings/WhyReplaceBrushheadPage.js";  //done
-        // todo 文件获取的格式有问题
-//        String filePath="/Users/huamiumiu/Desktop/rn框架/problem/Other.js";    //todo
-//        String filePath = "/Users/huamiumiu/Desktop/rn框架/problem/SettingPage.js";    //todo
-//        String filePath = "/Users/huamiumiu/Desktop/rn框架/problem";    //todo
-
-
-//        String  filePath = "/Users/huamiumiu/Desktop/rn框架/MHLocalizableString.js";
-//        String  filePath = "/Users/huamiumiu/Desktop/rn框架/pro/Base-EN.js";
-
-        List list = new ArrayList();
-        List<File> fileList = Utils.getAllDirsAndFiles(list, new File(filePath), "js");
-        LOGGER.info("all fileList is:{}", fileList);
+//        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings";
+        String filePath = fixPath(args[0]);
+        List<File> fileList = new ArrayList();
+        ResultAnalyzeHelper resultAnalyzeHelper = new ResultAnalyzeHelper();
+        StringsHelper.getAllDirsAndFiles(fileList, new File(filePath), "js");
+        LOGGER.info("##################### all fileList is:{} ######################",fileList);
         //对每个文件进行处理
         for (int i = 0; i < fileList.size(); i++) {
-            LOGGER.info("对第 {} 个文件进行处理，total is {}", i + 1, fileList.size());
-            Utils utils = new Utils();
-            Map<String, JSONObject> map = new HashMap();
-
+            File file = fileList.get(i);
+            LOGGER.info("##################### 对第 {} 个文件进行处理，total is {} 个文件 #####################", i + 1, fileList.size());
+           //选取其中的一个文件
+            LOGGER.info("当前文件为：{}", file.toString());
             Map<String, Integer> exportStringsMap = new HashMap();
-            Map<String, JSONObject> zhHantMapTmp = new HashMap();
-            Map<String, JSONObject> zhHantMap = new HashMap();
-
             exportStringsMap.put("stringsExport", 0);
             List stringsList = new ArrayList();
             List zhHantList = new ArrayList();
-//            List foreignList = new ArrayList();
-            List fantiCNList = new ArrayList();
             List<Map<String, JSONObject>> mapList = new ArrayList();
-            //选取其中的一个文件
-            LOGGER.info("当前文件为：{}", fileList.get(i).toString());
+
             //将文件转化为string格式来处理
-            String fileStringResult = Utils.getStringFileFromPath(fileList.get(i).toString());
-            //将字符串按照格式，划分为stringsList,zhHantList
-            Utils.convertStringFileToListFile(stringsList, zhHantList, fileStringResult, exportStringsMap);
-            if (zhHantList.size() == stringsList.size() && stringsList.size() == exportStringsMap.get("stringsExport")) {
-                for (int t = 0; t < stringsList.size(); t++) {
-                    Map<String, JSONObject> stringsMap = new HashMap();
-                    String strSub = stringsList.get(t).toString();
-                    String zhHant = zhHantList.get(t).toString();
-                    List foreignList = utils.parseStringToList(strSub);
-                    utils.parseStringsToMap(foreignList,stringsMap,zhHant);
-                    mapList.add(stringsMap);
-                }
-//                System.out.println("》》》》》》》》mapList" + mapList);
-//                for(int k=0;k<mapList.size();k++){
-//                    System.out.println("===="+mapList.get(k));
-//                }
+            String fileStringResult = StringsHelper.getStringFileFromPath(file.toString());
+            //todo  入口设置在这里，根据文件类型来选择后面的处理方法
+            Boolean flag = StringUtils.containsAny(file.getName(), "EN.js", "TW.js");
+            if (flag) {
+                StringsHelper.convertStringFileToListFile(fileStringResult, file, resultMap2);
             } else {
-                LOGGER.error("文件的格式不对称");
-            }
-            for (int mapNum = 0; mapNum < mapList.size(); mapNum++) {
-                Map<String, JSONObject> failResultMap = new HashMap<String, JSONObject>();
-                LOGGER.info("list file is {}", list);
-                LOGGER.info("第 {} 个map,total is {}", mapNum + 1, mapList.size());
-                LOGGER.info("mapList.get(mapNum) is {}", mapList.get(mapNum));
-                ResultAnalyze resultAnalyze = new ResultAnalyze();
-                resultAnalyze.analyseMapResult(mapList.get(mapNum), failResultMap);
-                if(failResultMap.size()!=0){
-                    resultMap.put(fileList.get(i), (HashMap<String, JSONObject>) failResultMap);
-                }else {
-                    LOGGER.info("failResultMap is null");
+                if (file.getName().startsWith("MHL")) {
+                    //todo
+                } else {
+                    //将字符串按照格式，划分为stringsList,zhHantList
+                    StringsHelper.convertStringFileToListFile(stringsList, zhHantList, fileStringResult, exportStringsMap);
+                    resultAnalyzeHelper.convertStringAndZhhantToMap(zhHantList, stringsList, mapList, exportStringsMap);
+                    resultAnalyzeHelper.outputFailResult(resultMap, mapList, file);
                 }
             }
         }
-        LOGGER.info("all is finished <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-        if (resultMap.size()!= 0) {
+
+        LOGGER.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> all all all  all all is finished <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+        if (resultMap.size() != 0) {
             for (Map.Entry<File, HashMap<String, JSONObject>> entry : resultMap.entrySet()) {
-//                for (Map.Entry<String, JSONObject> subEntry : entry.getValue().entrySet()) {
-                    LOGGER.info("file is {},fail result is {}", entry.getKey(), entry.getValue());
-//                }
+                LOGGER.info("file is {},fail result is {}", entry.getKey(), entry.getValue());
             }
         } else {
-            LOGGER.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< all is passed,congratulations!!!!! ");
+            LOGGER.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< all is passed,congratulations!!!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         }
     }
+
+
+    private static boolean isOsWindows() {
+        String osname = System.getProperty("os.name").toLowerCase();
+        boolean rt = osname.startsWith("windows");
+        return rt;
+    }
+
+    public static String fixPath(String path) {
+        if (null == path) return path;
+        if (path.length() >= 1 && ('/' == path.charAt(0) || '\\' == path.charAt(0))) {
+            // 根目录, Windows下需补上盘符.
+            if (isOsWindows()) {
+                String userdir = System.getProperty("user.dir");
+                if (null != userdir && userdir.length() >= 2) {
+                    return userdir.substring(0, 2) + path;
+                }
+            }
+        }
+        return path;
+    }
+
 
     @Test
     public void test() {

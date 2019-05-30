@@ -7,6 +7,36 @@
     <groupId>jsStringParseTool</groupId>
     <artifactId>com.xiaomi.jstool</artifactId>
     <version>1.0-SNAPSHOT</version>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>2.6</version>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <!-- 此处指定main方法入口的class -->
+                                    <mainClass>com.xiaomi.jstool.MainEntry</mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>make-assembly</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>assembly</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
     <dependencies>
         <dependency>
             <groupId>org.json</groupId>
@@ -50,6 +80,8 @@
             <artifactId>poi-ooxml</artifactId>
             <version>3.17</version>
         </dependency>
+
+
 
 
 
