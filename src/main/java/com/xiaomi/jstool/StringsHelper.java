@@ -12,8 +12,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class StringsHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(StringsHelper.class);
@@ -28,7 +32,8 @@ public class StringsHelper {
         StringBuilder sb = new StringBuilder();
         String line = null;
         while ((line = reader.readLine()) != null) {
-            if (line.indexOf("//") > 0) {
+//            if (line.indexOf("//") > 0 || line.indexOf("////")>0) {
+                if(line.contains("//")){
 //                line = line.substring(0, line.indexOf("//"));
                 line = "";
             } else if (line.startsWith("import")) {
@@ -40,10 +45,75 @@ public class StringsHelper {
         }
         reader.close();
         fileStringResult = sb.toString();
-//        LOGGER.info("get file StringResult: {}", fileStringResult);
+        LOGGER.info("get file StringResult: {}", fileStringResult);
         return fileStringResult;
     }
+    //todo 各个国家的key不一致！！！！！！！
+    //用于提取相应的base串，主要用于MHLocalizableStrings 产品（一个文件里面包含了多个国家，且export出来的字段有出入）
+    public static Map<String, JSONObject> getBaseMap(String fileStringResult,List<String> baseMapKeyList) throws JSONException {
+        Map<String,JSONObject> baseMap = new HashMap<String, JSONObject>();
+//        List<String> baseMapKeyList = new ArrayList<String>();
+        String start = fileStringResult.trim().substring(fileStringResult.indexOf("const"),fileStringResult.indexOf("export")).trim();
+        String[] strArr = start.split("const ");
+        for(String string:strArr){
+            System.out.println(string);
+        }
 
+        for(String str:strArr) {
+            if (str.contains("= {")) {
+//                System.out.println("str is "+str);
+//                int num = str.indexOf("=");
+//                System.out.println("num= "+num);
+                String baseMapKey = str.substring(0, str.indexOf("=")).trim();
+                if (StringUtils.containsAny(baseMapKey, "deBase", "itBase", "frBase", "ruBase", "esBase", "zhBase", "twhkBase", "enBase")) {
+                    //todo 把=号去掉
+                    int begin = str.indexOf("=");
+                    int end = str.indexOf("};");
+//                    int length = str.length();
+//                    System.out.println("begin= "+begin);
+//                    System.out.println("end= "+end );
+//                    System.out.println("length= "+length);
+                    String baseMapValue = str.substring(begin, end).replace("=", "").trim();
+                    if (baseMapValue.endsWith(",")) {
+                        StringUtils.removeEnd(baseMapValue, ",");
+                    }
+                    baseMapValue = baseMapValue + "}";
+                    JSONObject baseObject = new JSONObject(baseMapValue);
+                    baseMap.put(baseMapKey, baseObject);
+                    baseMapKeyList.add(baseMapKey);
+                } else continue;
+            } else {
+                LOGGER.info("this current str is null，continue");
+            }
+        }
+            return baseMap;
+
+    }
+
+
+
+
+    //用于提取export后面的内容，主要用于空净产品
+    public static JSONObject parseStringsToJson(String fileStringResult,Set<String> keySet) throws JSONException {
+        if(fileStringResult!=null &&fileStringResult.contains("{")){
+            String start = fileStringResult.substring(fileStringResult.indexOf("{"),fileStringResult.lastIndexOf("}")).trim();
+            if(start.endsWith(",")){
+                start = StringUtils.removeEnd(start,",");
+            }
+            start = start+"}";
+            LOGGER.info("jsonObject from string : {}",start);
+            JSONObject jsonObject = new JSONObject(start);
+            //遍历这个文件的JSONObject，获取key值，存到keySet里面去
+            Iterator iterator = jsonObject.keys();
+            while (iterator.hasNext()) {
+                String jsonKey = (String) iterator.next();
+                keySet.add(jsonKey);
+            }
+            return jsonObject;
+        } else {
+            LOGGER.info("input string is invalid {}",fileStringResult);
+        }return null;
+    }
     /**
      * zh_Hant1 = {
      * tip_bluetoothNotOpen: "藍牙未打開",
@@ -135,7 +205,6 @@ public class StringsHelper {
     }
 
 
-    //todo  这个方法还需要改，文件大了的时候，处理起来很慢。
     //  对strings的整体结构进行处理（包含直接引用和间接引用），存到JSONObject和map里面去
     public static Map parseStringsToMap(List foreignList, Map<String, JSONObject> stringsMap, String zhHant) throws JSONException {
         if (foreignList != null) {
@@ -159,9 +228,6 @@ public class StringsHelper {
         } else {
             LOGGER.info("input zhHant string is null");
         }
-//        for (Map.Entry<String, JSONObject> entry : stringsMap.entrySet()) {
-//            LOGGER.info("map key={},value={}", entry.getKey(), entry.getValue());
-//        }
         return stringsMap;
     }
 
