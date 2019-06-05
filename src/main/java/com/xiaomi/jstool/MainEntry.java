@@ -6,7 +6,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -32,17 +31,21 @@ public class MainEntry {
     public static List<String> baseKeyList = new ArrayList<String>();
 
     public static void main(String[] args) throws IOException, JSONException {
+//        String filePath = args[0];
 //        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings";
 //        String filePath="/Users/huamiumiu/Desktop/rn框架/pro";
         String filePath = "/Users/huamiumiu/Desktop/rn框架/MHLocalizableString.js";
+        List<File> fileList = new ArrayList();
+        ResultAnalyzeHelper resultAnalyzeHelper = new ResultAnalyzeHelper();
+
+
+
         File dataFile = new File(filePath);
         String basePath = dataFile.getParentFile().toString() + "/report/";
         String resultPath = fixPath(basePath + "result.txt");
         String failResultPath = fixPath(basePath + "failResult.txt");
         FileHelper.createFile(fixPath(resultPath));
 
-        List<File> fileList = new ArrayList();
-        ResultAnalyzeHelper resultAnalyzeHelper = new ResultAnalyzeHelper();
         StringsHelper.getAllDirsAndFiles(fileList, new File(filePath), "js");
         LOGGER.info("##################### all fileList is:{} ######################", fileList);
         //对每个文件进行处理
@@ -50,21 +53,20 @@ public class MainEntry {
             File file = fileList.get(i);
             LOGGER.info("##################### 对第 {} 个文件进行处理，total is {} 个文件 #####################", i + 1, fileList.size());
             //选取其中的一个文件
-            LOGGER.info("当前文件为：{}", file.toString());
+            LOGGER.info("当前文件为：{}", file);
             //将文件转化为string格式来处理
-            String fileStringResult = StringsHelper.getStringFileFromPath(file.toString());
+            String fileStringResult = StringsHelper.parseFileToString(file);
             //todo  入口设置在这里，根据文件类型来选择后面的处理方法
             Boolean flag = StringUtils.containsAny(file.getName(), "EN.js", "TW.js");
             if (flag) {
-                //空气净化器产品的入口
+                //空气净化器产品的入口（一个文件一个国家，不同文件的的key不一样，有多个文件）
                 Set<String> keySet = new HashSet<String>();
                 fileNameList.add(file.getName().substring(file.getName().lastIndexOf("-"), file.getName().indexOf(".js")).replace("-", ""));
                 JSONObject jb = StringsHelper.parseStringsToJson(fileStringResult, keySet);
                 totalKeySet.addAll(keySet);
                 jsonList.add(jb);
-
             } else {
-                //MHLocalizableStrings 产品（一个文件里面包含了多个国家，且export出来的字段有出入）
+                //MHLocalizableStrings 产品（一个文件里面包含多个国家，base的key也不一样，一个文件）
                 if (file.getName().startsWith("MHL")) {
                     //todo
                     jsonList = StringsHelper.getBaseJsonList(fileStringResult, baseKeyList);

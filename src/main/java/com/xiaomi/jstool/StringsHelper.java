@@ -22,11 +22,11 @@ import java.util.Set;
 public class StringsHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(StringsHelper.class);
 
-    //从路径获取文件，输出一个string
-    public static String getStringFileFromPath(String filePath) throws IOException {
-        LOGGER.info("get file from path {}", filePath);
+    //获取文件，输出一个string
+    public static String parseFileToString(File file) throws IOException {
+        LOGGER.info("file is {}", file);
         String fileStringResult = null;
-        File file = new File(filePath);
+//        File file = new File(filePath);
         InputStreamReader isReader = new InputStreamReader(new FileInputStream(file));
         BufferedReader reader = new BufferedReader(isReader);
         StringBuilder sb = new StringBuilder();
@@ -50,28 +50,17 @@ public class StringsHelper {
     }
 
     //todo 各个国家的key不一致！！！！！！！
-    //用于提取相应的base串，主要用于MHLocalizableStrings 产品（一个文件里面包含了多个国家，且export出来的字段有出入）
+    //MHLocalizableStrings 产品，对string进行处理，提取符合要求的base串，提取key提取json串
     public static List<JSONObject> getBaseJsonList(String fileStringResult, List<String> baseKeyList) throws JSONException {
         List<JSONObject> baseJsonList = new ArrayList<JSONObject>();
-        String start = fileStringResult.trim().substring(fileStringResult.indexOf("const"), fileStringResult.indexOf("export")).trim();
+        String start = fileStringResult.substring(fileStringResult.indexOf("const"), fileStringResult.indexOf("export")).trim();
         String[] strArr = start.split("const ");
-        for (String string : strArr) {
-            System.out.println(string);
-        }
         for (String str : strArr) {
             if (str.contains("= {")) {
-//                System.out.println("str is "+str);
-//                int num = str.indexOf("=");
-//                System.out.println("num= "+num);
                 String baseKey = str.substring(0, str.indexOf("=")).trim();
                 if (StringUtils.containsAny(baseKey, "deBase", "itBase", "frBase", "ruBase", "esBase", "zhBase", "twhkBase", "enBase")) {
-                    //todo 把=号去掉
                     int begin = str.indexOf("=");
                     int end = str.indexOf("};");
-//                    int length = str.length();
-//                    System.out.println("begin= "+begin);
-//                    System.out.println("end= "+end );
-//                    System.out.println("length= "+length);
                     String baseMapValue = str.substring(begin, end).replace("=", "").trim();
                     if (baseMapValue.endsWith(",")) {
                         StringUtils.removeEnd(baseMapValue, ",");
@@ -90,7 +79,6 @@ public class StringsHelper {
         LOGGER.info("baseKeyList size is {},list is {}",baseKeyList.size(),baseKeyList);
         LOGGER.info("baseJsonList size is {},list  is {}",baseJsonList.size(),baseJsonList);
         return baseJsonList;
-
     }
 
     public static void getAllJsonKeys(JSONObject jsonObject, Set<String> keySet) {
