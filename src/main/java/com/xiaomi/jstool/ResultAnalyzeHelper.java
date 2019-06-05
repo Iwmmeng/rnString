@@ -20,9 +20,9 @@ public class ResultAnalyzeHelper {
 
 
     //主要是给文件夹localizedStrings用的
-    public void outputFailResult(Map<File, HashMap<String, JSONObject>> failResultsOfAllMaps, List<Map<String, JSONObject>> mapList, File file,String allOutputPath,String zh,String en) throws JSONException, IOException {
+    public void outputFailResult(Map<File, HashMap<String, JSONObject>> failResultsOfAllMaps, List<Map<String, JSONObject>> mapList, File file, String allOutputPath, String zh, String en) throws JSONException, IOException {
         ResultAnalyzeHelper analyzeHelper = new ResultAnalyzeHelper();
-        Map<String, JSONObject> failResultMap = analyzeHelper.getFailResult(mapList,allOutputPath,zh,en);
+        Map<String, JSONObject> failResultMap = analyzeHelper.getFailResult(mapList, allOutputPath, zh, en);
         if (failResultMap.size() != 0) {
             failResultsOfAllMaps.put(file, (HashMap<String, JSONObject>) failResultMap);
         } else {
@@ -30,9 +30,8 @@ public class ResultAnalyzeHelper {
         }
     }
 
-
     //获取结果的入口
-    private Map getFailResult(List<Map<String, JSONObject>> mapList,String allOutputPath,String zh,String en) throws JSONException, IOException {
+    private Map getFailResult(List<Map<String, JSONObject>> mapList, String allOutputPath, String zh, String en) throws JSONException, IOException {
         Map<String, JSONObject> failResultMap = null;
         if (mapList.size() != 0) {
             for (int mapNum = 0; mapNum < mapList.size(); mapNum++) {
@@ -40,7 +39,7 @@ public class ResultAnalyzeHelper {
                 LOGGER.info("###################### 第 {} 个map,total is {} #####################", mapNum + 1, mapList.size());
                 LOGGER.info("mapList.get(mapNum) is {}", mapList.get(mapNum));
                 ResultAnalyzeHelper resultAnalyzeHelper = new ResultAnalyzeHelper();
-                resultAnalyzeHelper.analyseMapResult(mapList.get(mapNum),failResultMap,allOutputPath,zh,en);
+                resultAnalyzeHelper.analyseMapResult(mapList.get(mapNum), failResultMap, allOutputPath, zh, en);
             }
         } else {
             LOGGER.info("mapList is null");
@@ -64,7 +63,7 @@ public class ResultAnalyzeHelper {
     }
 
     //主要用于LocalizedStrings，传入一个正常的map，输出fail的map
-    private void analyseMapResult(Map<String, JSONObject> map,Map<String, JSONObject> failResultMap,String allOutputPath,String zh,String en) throws JSONException, IOException {
+    private void analyseMapResult(Map<String, JSONObject> map, Map<String, JSONObject> failResultMap, String allOutputPath, String zh, String en) throws JSONException, IOException {
         List mapKeyList = new ArrayList();
         //提取map的key，作为索引
         for (String key : map.keySet()) {
@@ -83,15 +82,15 @@ public class ResultAnalyzeHelper {
         }
         LOGGER.info("jsonKeyList size is {},list is {}", jsonKeyList.size(), jsonKeyList);
         //对整体按照提取粗来的mapKey和jsonKey 来获取记录的值，表达出来
-        jsonValueListOutput = getJsonValueList(jsonKeyList, map, mapKeyList,allOutputPath);
+        jsonValueListOutput = getJsonValueList(jsonKeyList, map, mapKeyList, allOutputPath);
 
         int ZH = mapKeyList.indexOf(zh);
         int EN = mapKeyList.indexOf(en);
         LOGGER.info("ZH is {},EN is {}", ZH, EN);
-        getFailResultMap(jsonValueListOutput, ZH, EN, mapKeyList,failResultMap);
+        getFailResultMap(jsonValueListOutput, ZH, EN, mapKeyList, failResultMap);
     }
 
-    public void  getFailResultMap(List<List<String>> jsonValueListOutput, int ZH, int EN, List mapKeyList,Map<String, JSONObject> failResultMap) throws JSONException {
+    public void getFailResultMap(List<List<String>> jsonValueListOutput, int ZH, int EN, List mapKeyList, Map<String, JSONObject> failResultMap) throws JSONException {
 //        Map<String, JSONObject> failResultMap = new HashMap<String, JSONObject>();
         for (int nc = 0; nc < jsonValueListOutput.size(); nc++) {
             LOGGER.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>start to parse 第 {} 个 jsonKey，total is {}，jsonKey is {} ", nc + 1, jsonValueListOutput.size(), jsonValueListOutput.get(nc).get(0).toString());
@@ -112,29 +111,29 @@ public class ResultAnalyzeHelper {
                 }
             }
         }
-        LOGGER.info(">>>>>>>>>>>>>>>>>>>>>>> parse current file finish,fail 的结果为 {}<<<<<<<<<<<<<<<<<<<<<",failResultMap);
+        LOGGER.info(">>>>>>>>>>>>>>>>>>>>>>> parse current file finish,fail 的结果为 {}<<<<<<<<<<<<<<<<<<<<<", failResultMap);
     }
 
 
     /**
      * jsonValueList:[jsonKey,jsonValue1,jsonValue12]
      */
-    public List getJsonValueList(List jsonKeyList, Map<String, JSONObject> map, List mapKeyList,String allOutputPath) throws JSONException, IOException {
+    public List getJsonValueList(List jsonKeyList, Map<String, JSONObject> map, List mapKeyList, String allOutputPath) throws JSONException, IOException {
         List<List<String>> jsonValueListOutput = new ArrayList<List<String>>();
-        BufferedWriter writer  = new BufferedWriter(new FileWriter(allOutputPath, false));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(allOutputPath, false));
         writer.write("jsonKey,");
-        for(int n = 0; n < mapKeyList.size(); n++){
-            writer.write(mapKeyList.get(n).toString()+",");
+        for (int n = 0; n < mapKeyList.size(); n++) {
+            writer.write(mapKeyList.get(n).toString() + ",");
         }
         writer.newLine();
 
         for (int m = 0; m < jsonKeyList.size(); m++) {
             List jsonValueList = new ArrayList();
             //TODO 对当前整个文件的数据落盘输出
-            writer.write(jsonKeyList.get(m).toString()+",");
+            writer.write(jsonKeyList.get(m).toString() + ",");
             for (int n = 0; n < mapKeyList.size(); n++) {
                 String jsonValue = map.get(mapKeyList.get(n)).getString(jsonKeyList.get(m).toString());
-                jsonValueList.add(jsonValue+",");
+                jsonValueList.add(jsonValue + ",");
                 writer.write(jsonValue);
             }
             writer.newLine();
@@ -143,11 +142,7 @@ public class ResultAnalyzeHelper {
             jsonValueList.add(0, jsonKeyList.get(m));
             jsonValueListOutput.add(jsonValueList);
             LOGGER.info("jsonValueList size {},list is {}", jsonValueList.size(), jsonValueList);
-
-
-
         }
-
         return jsonValueListOutput;
     }
 

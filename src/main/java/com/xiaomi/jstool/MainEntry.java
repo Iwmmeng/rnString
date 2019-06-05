@@ -21,28 +21,35 @@ import java.util.Set;
 public class MainEntry {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainEntry.class);
     public static Map<File, HashMap<String, JSONObject>> failResultsOfAllMaps = new HashMap<File, HashMap<String, JSONObject>>();
+    public static Map<String, JSONObject> failResultsOfAllJsons = new HashMap<String, JSONObject>();
     public static Set<String> totalKeySet = new HashSet<String>();
     public static List<JSONObject> jsonList = new ArrayList<JSONObject>();
-    public  static List<String> fileNameList = new ArrayList<String>();
+    public static List<String> fileNameList = new ArrayList<String>();
+    public static int ZH = -1;
+    public static int EN = -1;
+    public static List<List<String>> totalJsonValueLists = new ArrayList<List<String>>();
+    //用于存储base里面的所有国家
+    public static List<String> baseKeyList = new ArrayList<String>();
 
     public static void main(String[] args) throws IOException, JSONException {
 //        String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings";
 //        String filePath="/Users/huamiumiu/Desktop/rn框架/pro";
-        String filePath="/Users/huamiumiu/Desktop/rn框架/MHLocalizableString.js";
+        String filePath = "/Users/huamiumiu/Desktop/rn框架/MHLocalizableString.js";
         File dataFile = new File(filePath);
-        String basePath = dataFile.getParentFile().toString()+"/report/";
+        String basePath = dataFile.getParentFile().toString() + "/report/";
         String resultPath = fixPath(basePath + "result.txt");
+        String failResultPath = fixPath(basePath + "failResult.txt");
         FileHelper.createFile(fixPath(resultPath));
 
         List<File> fileList = new ArrayList();
         ResultAnalyzeHelper resultAnalyzeHelper = new ResultAnalyzeHelper();
         StringsHelper.getAllDirsAndFiles(fileList, new File(filePath), "js");
-        LOGGER.info("##################### all fileList is:{} ######################",fileList);
+        LOGGER.info("##################### all fileList is:{} ######################", fileList);
         //对每个文件进行处理
         for (int i = 0; i < fileList.size(); i++) {
             File file = fileList.get(i);
             LOGGER.info("##################### 对第 {} 个文件进行处理，total is {} 个文件 #####################", i + 1, fileList.size());
-           //选取其中的一个文件
+            //选取其中的一个文件
             LOGGER.info("当前文件为：{}", file.toString());
             //将文件转化为string格式来处理
             String fileStringResult = StringsHelper.getStringFileFromPath(file.toString());
@@ -51,8 +58,8 @@ public class MainEntry {
             if (flag) {
                 //空气净化器产品的入口
                 Set<String> keySet = new HashSet<String>();
-                fileNameList.add(file.getName().substring(file.getName().lastIndexOf("-"),file.getName().indexOf(".js")).replace("-",""));
-                JSONObject jb = StringsHelper.parseStringsToJson(fileStringResult,keySet);
+                fileNameList.add(file.getName().substring(file.getName().lastIndexOf("-"), file.getName().indexOf(".js")).replace("-", ""));
+                JSONObject jb = StringsHelper.parseStringsToJson(fileStringResult, keySet);
                 totalKeySet.addAll(keySet);
                 jsonList.add(jb);
 
@@ -60,15 +67,11 @@ public class MainEntry {
                 //MHLocalizableStrings 产品（一个文件里面包含了多个国家，且export出来的字段有出入）
                 if (file.getName().startsWith("MHL")) {
                     //todo
-                    List<Map<String, JSONObject>> mapList = new ArrayList();
-                    List<String> baseMapKeyList = new ArrayList<String>();
-                    String zh = "zhBase";
-                    String en = "enBase";
-                    String outputPath =fixPath(basePath+file.getName().replace(".js","")+".txt");
-                    Map<String, JSONObject> baseMap = StringsHelper.getBaseMap(fileStringResult,baseMapKeyList);
-                    mapList.add(baseMap);
-                    resultAnalyzeHelper.outputFailResult(failResultsOfAllMaps, mapList, file,outputPath,zh,en);
-
+                    jsonList = StringsHelper.getBaseJsonList(fileStringResult, baseKeyList);
+                    for (int jNum = 0; jNum < jsonList.size(); jNum++) {
+                        JSONObject json = jsonList.get(jNum);
+                        StringsHelper.getAllJsonKeys(json, totalKeySet);
+                    }
                 } else {
                     Map<String, Integer> exportStringsMap = new HashMap();
                     exportStringsMap.put("stringsExport", 0);
@@ -77,63 +80,110 @@ public class MainEntry {
                     List<Map<String, JSONObject>> mapList = new ArrayList();
                     String zh = "zh";
                     String en = "en";
-                    String outputPath =fixPath(basePath+file.getName().replace(".js","")+".txt");
-                    fileNameList.add(file.getName().substring(file.getName().lastIndexOf("-"),file.getName().indexOf(".js")).replace("-",""));
-
+                    String outputPath = fixPath(basePath + file.getName().replace(".js", "") + ".txt");
                     //将字符串按照格式，划分为stringsList,zhHantList
                     StringsHelper.convertStringFileToListFile(stringsList, zhHantList, fileStringResult, exportStringsMap);
                     resultAnalyzeHelper.convertStringAndZhhantToMap(zhHantList, stringsList, mapList, exportStringsMap);
-                    resultAnalyzeHelper.outputFailResult(failResultsOfAllMaps, mapList, file,outputPath,zh,en);
+                    resultAnalyzeHelper.outputFailResult(failResultsOfAllMaps, mapList, file, outputPath, zh, en);
                 }
             }
         }
 
         //todo 所有结果的处理都是需要等到循环后在做，这个结果怎么来分类处理呢？？？对最终结果进行逐个的判断
         LOGGER.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> all all all  all all is finished <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-        LOGGER.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> result path is {} <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<",resultPath);
+        LOGGER.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> result path is {} <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", resultPath);
 
-        BufferedWriter writer  = new BufferedWriter(new FileWriter(resultPath, false));
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(resultPath, false));
         //针对多个localizedStrings 下多个文件的（一个文件里面包含多个国家）
         if (failResultsOfAllMaps.size() != 0) {
             for (Map.Entry<File, HashMap<String, JSONObject>> entry : failResultsOfAllMaps.entrySet()) {
                 LOGGER.info("file is {},fail result is {}", entry.getKey(), entry.getValue());
-                writer.write(entry.getKey()+","+entry.getValue());
+                writer.write(entry.getKey() + "," + entry.getValue());
                 writer.newLine();
                 writer.flush();
             }
-        //用于不同国家在不同的文件里面
-        }else if(totalKeySet.size()!=0){
+            //用于不同国家在不同的文件里面
+        } else if (totalKeySet.size() != 0) {
             writer.write("keys,");
-            for(String s:fileNameList){
-                writer.write(s+",");
+            if (fileNameList.size() != 0) {
+                for (String s : fileNameList) {
+                    writer.write(s + ",");
+                }
+            } else if (baseKeyList.size() != 0) {
+                baseKeyList.add(0, "N/A");
+                for (int keyNum = 0; keyNum < baseKeyList.size(); keyNum++) {
+                    String baseKey = baseKeyList.get(keyNum);
+                    writer.write(baseKey + ",");
+                    if (baseKey.startsWith("zh")) {
+                        ZH = keyNum;
+                    }
+                    if (baseKey.startsWith("en")) {
+                        EN = keyNum;
+                    }
+                }
+
             }
             writer.newLine();
             writer.flush();
             //将所有的key都落盘
-            for(String key:totalKeySet){
-                writer.write(key+",");
-                for(int j=0;j<jsonList.size();j++){
+            for (String key : totalKeySet) {
+                List<String> jsonValueList = new ArrayList<String>();
+                writer.write(key + ",");
+                for (int j = 0; j < jsonList.size(); j++) {
                     JSONObject object = jsonList.get(j);
-                    if(!object.isNull(key)){
-                        writer.write(object.getString(key)+",");
-                    }else {
+                    if (!object.isNull(key)) {
+                        writer.write(object.getString(key) + ",");
+                        jsonValueList.add(object.getString(key));
+                    } else {
                         writer.write("N/A,");
+                        jsonValueList.add("N/A");
                     }
                 }
+                jsonValueList.add(0, key);
+//                LOGGER.info("jsonValueList is {}", jsonValueList);
+                totalJsonValueLists.add(jsonValueList);
                 writer.newLine();
                 writer.flush();
             }
-        }
-
-
-        else {
+        } else {
             LOGGER.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< all is passed,congratulations!!!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         }
 
-
-
-
-
+        /**        en        ru         zh
+         * key1    v11       v12        v13
+         * key2    v21       v22        v23
+         * **/
+        //对落盘的结果在做分析
+        if (ZH >= 0 && EN >= 0) {
+            for (int k = 0; k < totalJsonValueLists.size(); k++) {
+                List list = totalJsonValueLists.get(k);
+                LOGGER.info("list is {}", list);
+                JSONObject jObject = new JSONObject();
+                for (int tmp = 1; tmp < list.size(); tmp++) {
+                    if (tmp == ZH || tmp == EN) {
+                        continue;
+                    } else {
+                        if (list.get(tmp).equals(list.get(ZH) )|| list.get(tmp).equals(list.get(EN))) {
+                            String resultJsonKey = baseKeyList.get(tmp);
+                            String resultJsonValue = list.get(tmp).toString();
+                            jObject.put(resultJsonKey, resultJsonValue);
+                        }
+                    }
+                }
+                if (jObject.length()!=0) {
+                    String resultKey = list.get(0).toString();
+                    failResultsOfAllJsons.put(resultKey, jObject);
+                }
+            }
+            BufferedWriter writer2 = new BufferedWriter(new FileWriter(failResultPath, false));
+            for (Map.Entry<String, JSONObject> entry : failResultsOfAllJsons.entrySet()) {
+                LOGGER.info("key is {},fail result is {}", entry.getKey(), entry.getValue());
+                writer2.write(entry.getKey() + "," + entry.getValue());
+                writer2.newLine();
+                writer2.flush();
+            }
+        }
 
     }
 

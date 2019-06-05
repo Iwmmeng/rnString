@@ -264,8 +264,19 @@ public class ExcelHelper {
         System.out.println(str.indexOf("="));
         System.out.println(str.indexOf("};"));
         System.out.println(str.substring(str.indexOf("="),str.indexOf("};")).trim().replace("=",""));
-
     }
+    @Test
+    public void testJO() throws JSONException {
+        JSONObject jb = new JSONObject();
+        for(int i=0;i<2;i++){
+            jb.put(String.valueOf(i),String.valueOf(i));
+        }
+        System.out.println(jb);
+    }
+
+
+
+
 
 
 }

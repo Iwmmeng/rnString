@@ -1,11 +1,14 @@
 package com.xiaomi.jstool;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 
 public class FileHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileHelper.class);
     //创建目录,args[0].getParent()
     public static boolean createDir(String destDirName){
         File dir = new File(destDirName);
@@ -30,12 +33,16 @@ public class FileHelper {
     public static boolean createFile(String destFileName) {
         File file = new File(destFileName);
         if(file.exists()) {
-            System.out.println("创建单个文件" + destFileName + "失败，目标文件已存在！");
-            return false;
+            LOGGER.info("创建单个文件 {} 失败，目标文件已存在！",destFileName);
         }
         if(!file.getParentFile().exists()) {
             //如果目标文件所在的目录不存在，则创建父目录
             System.out.println("目标文件所在目录不存在，准备创建它！");
+            FileHelper.createDir(file.getParentFile().toString());
+        }else {
+            //todo 删除该文件夹！！！！！！
+            LOGGER.info("目标文件所在目录已存在，删除，再重新创建");
+            deleteDir(file.getParentFile());
             FileHelper.createDir(file.getParentFile().toString());
         }
         //创建目标文件
@@ -53,6 +60,29 @@ public class FileHelper {
             return false;
         }
     }
+
+    public static boolean deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            //递归删除目录中的子目录下
+            for (int i=0; i<children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        // 目录此时为空，可以删除
+        return dir.delete();
+    }
+
+    @Test
+    public void testDelete(){
+        File  path =new File("/Users/huamiumiu/Desktop/rn框架/report");
+        System.out.println(deleteDir(path));
+
+    }
+
 
 
 
