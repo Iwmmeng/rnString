@@ -7,8 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -49,6 +51,171 @@ public class StringsHelper {
         return fileStringResult;
     }
 
+    /**
+     * Map<String, JSONObject>
+     * <"zh":{"key1","value1"}>
+     */
+    //MHLocalizableStrings 产品，对string进行处理，提取符合要求的base串，提取key提取json串,组装成map
+    public static Map<String, JSONObject> parseStringToMap(String fileStringResult) throws JSONException {
+        Map<String, JSONObject> stringMap = new HashMap<String, JSONObject>();
+        String start = fileStringResult.substring(fileStringResult.indexOf("const"), fileStringResult.indexOf("export")).trim();
+        String[] strArr = start.split("const ");
+        for (String str : strArr) {
+            if (str.contains("= {")) {
+                String key = str.substring(0, str.indexOf("=")).trim();
+                if (StringUtils.containsAny(key, "deBase", "itBase", "frBase", "ruBase", "esBase", "zhBase", "twhkBase", "enBase")) {
+                    int begin = str.indexOf("=");
+                    int end = str.indexOf("};");
+                    String mapValue = str.substring(begin, end).replace("=", "").trim();
+                    if (mapValue.endsWith(",")) {
+                        StringUtils.removeEnd(mapValue, ",");
+                    }
+                    JSONObject baseObject = new JSONObject(mapValue + "}");
+                    stringMap.put(key, baseObject);
+                } else {
+                    LOGGER.info("current string is not wanted  ");
+                }
+            } else {
+                LOGGER.info("current string is null");
+            }
+        }
+        return stringMap;
+    }
+
+
+    //                if (StringUtils.containsAny(key, "deBase", "itBase", "frBase", "ruBase", "esBase", "zhBase", "twhkBase", "enBase")) {
+//                    int begin = str.indexOf("=");
+//                    int end = str.indexOf("};");
+//                    String baseMapValue = str.substring(begin, end).replace("=", "").trim();
+//                    if (baseMapValue.endsWith(",")) {
+//                        StringUtils.removeEnd(baseMapValue, ",");
+//                    }
+//                    baseMapValue = baseMapValue + "}";
+//                    JSONObject baseObject = new JSONObject(baseMapValue);
+//                    stringMap.put(key,baseObject);
+//                }else {
+//                    LOGGER.info("current str is not match");
+//                }
+//            }else {
+//                LOGGER.info("this current str is null，continue");
+//            }
+//        }
+//        for(Map.Entry<String,JSONObject> entry:stringMap.entrySet()){
+//            LOGGER.info("map key is {}, value is {}",entry.getKey(),entry.getValue());
+//        }
+//        return stringMap;
+//    }
+    //获取map<String,JSONObject>里面JSONObject所有jsoney的并集
+    public static Set<String> getAllJsonKeysSet(Map<String, JSONObject> stringMap) {
+        Set<String> allJsonKeysSet = new HashSet<String>();
+        for (JSONObject jb : stringMap.values()) {
+            Iterator iterator = jb.keys();
+            while (iterator.hasNext()) {
+                String jsonKey = (String) iterator.next();
+                allJsonKeysSet.add(jsonKey);
+            }
+        }
+        return allJsonKeysSet;
+    }
+
+    //获取map<String,JSONObject>里面所有mapKey
+    public static List<String> getMapKeys(Map<String, JSONObject> stringMap) {
+        List mapKeyList = new ArrayList();
+        for (String mapKey : stringMap.keySet()) {
+            mapKeyList.add(mapKey);
+        }
+        return mapKeyList;
+    }
+
+    //落盘map数据
+    public static void saveMapToFile(String filePath, Map<String, JSONObject> stringMap) throws IOException, JSONException {
+        Set<String> allJsonKeysSet = StringsHelper.getAllJsonKeysSet(stringMap);
+        List<String> mapKeyList = StringsHelper.getMapKeys(stringMap);
+        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false));
+        writer.write("keys,");
+        for (String s : mapKeyList) {
+            writer.write(s + ",");
+        }
+        writer.newLine();
+        for (String jsonKey : allJsonKeysSet) {
+            for (int i = 0; i < mapKeyList.size(); i++) {
+                String mapKey = mapKeyList.get(i);
+                if (!stringMap.get(mapKey).isNull(jsonKey)) {
+                    writer.write(stringMap.get(mapKey).getString(jsonKey) + ",");
+                } else {
+                    writer.write("N/A,");
+                }
+            }
+            writer.newLine();
+        }
+        writer.close();
+    }
+
+    /**
+     * Map<String,JSONObject>
+     * input  <"zh":{"key1":"value1"}>
+     * output  <"key1":{"zh":"value1"}>
+     **/
+    //map<String,JSONObject> 中JSONObject value的值，若与en或zh列相同，则fail,
+    public static Map<String, JSONObject> getFailResultMap(Map<String, JSONObject> stringMap) throws JSONException {
+        Map<String, JSONObject> failResultMap = new HashMap<String, JSONObject>();
+        int ZHIndex = -1;
+        int ENIndex = -1;
+        int count = 0;
+        List<String> mapKeyList = StringsHelper.getMapKeys(stringMap);
+        Set<String> allJsonKeysSet = StringsHelper.getAllJsonKeysSet(stringMap);
+        for (String jsonKey : allJsonKeysSet) {
+            LOGGER.info("allJsonKeysSet size is {},index is {},jsonKey is {}", allJsonKeysSet.size(), count++, jsonKey);
+            List<String> jsonValueList = new ArrayList<String>();
+            for (String mapKey : mapKeyList) {
+                LOGGER.info("mapKeyList size is {},index is {},mapKey is {}", mapKeyList.size(), mapKeyList.indexOf(mapKey), mapKey);
+                if (mapKey.contains("zh")) {
+                    ZHIndex = mapKeyList.indexOf(mapKey);
+                } else if (mapKey.contains("en")) {
+                    ENIndex = mapKeyList.indexOf(mapKey);
+                }
+                if (!stringMap.get(mapKey).isNull(jsonKey)) {
+                    jsonValueList.add(stringMap.get(mapKey).getString(jsonKey));
+                } else {
+                    jsonValueList.add("N/A");
+                }
+            }
+            LOGGER.info("jsonValueList is {}", jsonValueList);
+            if (ZHIndex >= 0 && ENIndex >= 0) {
+                JSONObject jsonObject = new JSONObject();
+                for (int t = 0; t < jsonValueList.size(); t++) {
+                    if (t == ZHIndex || t == ENIndex) {
+                        continue;
+                    } else {
+                        if (jsonValueList.get(t).equals(jsonValueList.get(ZHIndex)) || jsonValueList.get(t).equals(jsonValueList.get(ENIndex))) {
+                            jsonObject.put(mapKeyList.get(t), jsonValueList.get(t));
+                        } else {
+                            LOGGER.info("good job,pass");
+                        }
+                    }
+                }
+                if(jsonObject.length()!=0) {
+                    failResultMap.put(jsonKey, jsonObject);
+                }
+            } else {
+                LOGGER.info("没有对照参考列 zh/en 列，无法进行比较");
+            }
+        }
+        return failResultMap;
+    }
+
+    //落盘fail数据
+    public static void saveFailResultMapToFile(Map<String, JSONObject> failResultMap, String filePath) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false));
+        for (Map.Entry<String, JSONObject> entry : failResultMap.entrySet()) {
+            LOGGER.info("key is {},value is {]",entry.getKey(),entry.getValue());
+            writer.write(entry.getKey() + "," + entry.getValue());
+            writer.newLine();
+        }
+        writer.close();
+    }
+
+
     //todo 各个国家的key不一致！！！！！！！
     //MHLocalizableStrings 产品，对string进行处理，提取符合要求的base串，提取key提取json串
     public static List<JSONObject> getBaseJsonList(String fileStringResult, List<String> baseKeyList) throws JSONException {
@@ -71,14 +238,15 @@ public class StringsHelper {
                     baseJsonList.add(baseObject);
                 } else {
                     LOGGER.info("current str is not match");
-                    }
+                }
             } else {
                 LOGGER.info("this current str is null，continue");
             }
         }
-        LOGGER.info("baseKeyList size is {},list is {}",baseKeyList.size(),baseKeyList);
-        LOGGER.info("baseJsonList size is {},list  is {}",baseJsonList.size(),baseJsonList);
+        LOGGER.info("baseKeyList size is {},list is {}", baseKeyList.size(), baseKeyList);
+        LOGGER.info("baseJsonList size is {},list  is {}", baseJsonList.size(), baseJsonList);
         return baseJsonList;
+
     }
 
     public static void getAllJsonKeys(JSONObject jsonObject, Set<String> keySet) {
@@ -93,28 +261,36 @@ public class StringsHelper {
         }
     }
 
-
-    //用于提取export后面的内容，主要用于空净产品
-    public static JSONObject parseStringsToJson(String fileStringResult, Set<String> keySet) throws JSONException {
+    //用于提取export后面的内容，把string转换成json串，主要用于空净产品
+    public static JSONObject parseStringsToJson(String fileStringResult) throws JSONException {
         if (fileStringResult != null && fileStringResult.contains("{")) {
             String start = fileStringResult.substring(fileStringResult.indexOf("{"), fileStringResult.lastIndexOf("}")).trim();
             if (start.endsWith(",")) {
                 start = StringUtils.removeEnd(start, ",");
             }
             start = start + "}";
-            LOGGER.info("jsonObject from string : {}", start);
             JSONObject jsonObject = new JSONObject(start);
-            //遍历这个文件的JSONObject，获取key值，存到keySet里面去
-            Iterator iterator = jsonObject.keys();
-            while (iterator.hasNext()) {
-                String jsonKey = (String) iterator.next();
-                keySet.add(jsonKey);
-            }
+            LOGGER.info("jsonObject is {}", jsonObject);
             return jsonObject;
         } else {
             LOGGER.info("input string is invalid {}", fileStringResult);
         }
         return null;
+    }
+
+    public static Set<String> getJsonKeySet(JSONObject jsonObject) {
+        Set<String> jsonKeySet = new HashSet<String>();
+        //遍历这个文件的JSONObject，获取key值，存到keySet里面去
+        if (jsonObject != null) {
+            Iterator iterator = jsonObject.keys();
+            while (iterator.hasNext()) {
+                String jsonKey = (String) iterator.next();
+                jsonKeySet.add(jsonKey);
+            }
+        } else {
+            LOGGER.info("input jsonObject is null,sad ");
+        }
+        return jsonKeySet;
     }
 
     /**
@@ -146,11 +322,10 @@ public class StringsHelper {
                 } else if (constStringArr[i].contains("zh_Hant")) {
                     String zh_Hant = constStringArr[i].substring(constStringArr[i].indexOf("zh_Hant"), constStringArr[i].indexOf("};")).trim();
                     if (zh_Hant.endsWith(",")) {
-                        StringUtils.reverse(zh_Hant).replaceFirst(",", "");
-                        StringUtils.reverse(zh_Hant);
+                        StringUtils.removeEnd(zh_Hant, ",");
                     }
-                    zh_Hant = zh_Hant + "}";
-                    zhHantList.add(zh_Hant);
+//                    zh_Hant = zh_Hant + "}";
+                    zhHantList.add(zh_Hant + "}");
                 } else {
                     LOGGER.error("this const is not wanted");
                 }
