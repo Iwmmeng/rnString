@@ -12,8 +12,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,14 +30,13 @@ public class StringsHelper {
         StringBuilder sb = new StringBuilder();
         String line = null;
         while ((line = reader.readLine()) != null) {
-//            if (line.indexOf("//") > 0 || line.indexOf("////")>0) {
             if (line.contains("//")) {
 //                line = line.substring(0, line.indexOf("//"));
                 line = "";
             } else if (line.startsWith("import")) {
                 line = "";
             } else if (line.indexOf(":") > 0 && (!line.trim().startsWith("\""))) {
-                line = ("\"" + line.trim().replaceFirst(":", "\":").trim()).replace("\u00a0", "");
+                line = ("\"" + line.trim().replaceFirst(":", "\":").trim()).replace("\u00a0", "").replace("\\n","");
             }
             sb.append(line.trim());
         }

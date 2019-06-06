@@ -7,8 +7,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -120,8 +122,10 @@ public class ResultAnalyzeHelper {
      */
     public List getJsonValueList(List jsonKeyList, Map<String, JSONObject> map, List mapKeyList, String allOutputPath) throws JSONException, IOException {
         List<List<String>> jsonValueListOutput = new ArrayList<List<String>>();
-        BufferedWriter writer = new BufferedWriter(new FileWriter(allOutputPath, false));
-        writer.write("jsonKey,");
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(allOutputPath,true),"UTF-8");
+        BufferedWriter writer = new BufferedWriter(outputStreamWriter);
+//        BufferedWriter writer = new BufferedWriter(new FileWriter(allOutputPath, true));
+        writer.write("name,");
         for (int n = 0; n < mapKeyList.size(); n++) {
             writer.write(mapKeyList.get(n).toString() + ",");
         }
