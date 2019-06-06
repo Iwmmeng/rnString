@@ -31,7 +31,6 @@ public class MainEntry {
     public static List<List<String>> totalJsonValueLists = new ArrayList<List<String>>();
     //用于存储base里面的所有国家
     public static List<String> baseKeyList = new ArrayList<String>();
-
     public static void main(String[] args) throws IOException, JSONException {
 //        String filePath = args[0];
         String filePath="/Users/huamiumiu/Desktop/rn框架/LocalizedStrings";
@@ -131,7 +130,6 @@ public class MainEntry {
                         EN = keyNum;
                     }
                 }
-
             }
             writer.newLine();
             writer.flush();

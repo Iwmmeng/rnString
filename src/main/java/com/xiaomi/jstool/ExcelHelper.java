@@ -22,9 +22,11 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND;
 
@@ -37,59 +39,38 @@ public class ExcelHelper {
      * key2     v21     v22      v23
      **/
 
-    public static void fillExcel(Map<String, JSONObject> map, XSSFWorkbook workbook, XSSFSheet sheet) throws IOException, JSONException {
+    public static void fillExcel(Map<String, JSONObject> stringMap, String fileName) throws IOException, JSONException {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet(fileName);
         //把文件名作为列表头（0行，从第一列开始）
-        List countryList = new ArrayList();
-        List jsonList = new ArrayList();
+        List<String> mapKeyList = ExcelHelper.getMapKeys(stringMap);
+        List<List<String>> allJsonValueLists = ExcelHelper.getAllJsonLists(stringMap);
         int count = 1;
         XSSFRow rowTitle = sheet.createRow(0);
-        for (String key : map.keySet()) {
+        for (String key : mapKeyList) {
             XSSFCell cellFileName = rowTitle.createCell(count++);
             cellFileName.setCellValue(key);
-            countryList.add(key);
         }
+        int rowColloum =1;
+        for(int i=0;i<allJsonValueLists.size();i++){
+            XSSFRow row = sheet.createRow(rowColloum++);
+            List<String> jsonValueList = allJsonValueLists.get(i);
+            for(int j=0;j<jsonValueList.size();j++){
+                XSSFCell cellValue = row.createCell(j + 1);
+                cellValue.setCellValue(jsonValueList.get(j));
+            }
+
+        }
+
+
+
+
+
+
+
+
+
         //把map的JONObject 中的key作为行表头，value作为值填充进去（0列，从第一行开始）
-        int rowColloum = 1;
-//        for (Map.Entry<String, JSONObject> entry : map.entrySet()) {
-
-            JSONObject jsonObject = map.get(countryList.get(0));
-            Iterator iterator = jsonObject.keys();
-            while (iterator.hasNext()) {
-                XSSFRow row = sheet.createRow(rowColloum++);
-                XSSFCell cellKey = row.createCell(0);
-                String jsonKey = (String) iterator.next();
-//                String value = entry.getValue().getString(jsonKey);//这里可以根据实际类型去获取
-                cellKey.setCellValue(jsonKey);
-                jsonList.add(jsonKey);
-                System.out.println("jsonKey" + jsonKey);
-            }
-//        }
-
-        for (int t = 0; t < jsonList.size(); t++) {
-                List jsonValueList = new ArrayList();
-            for (int r = 0; r < countryList.size(); r++) {
-                String country = countryList.get(r).toString();
-                String jsonKey = jsonList.get(t).toString();
-                XSSFRow row = sheet.createRow(t + 1);
-                if (country.equalsIgnoreCase("ch") || country.equalsIgnoreCase("en")) {
-                    XSSFCell cellValue = row.createCell(r + 1);
-                    cellValue.setCellValue(map.get(country).getString(jsonKey));
-                    jsonValueList.add(map.get(country).getString(jsonKey));
-                } else {
-                    XSSFCell cellValue = row.createCell(r + 1);
-                    cellValue.setCellValue(map.get(country).getString(jsonKey));
-                    jsonValueList.add(map.get(country).getString(jsonKey));
-                    if (map.get(country).getString(jsonKey).equals(map.get("zh").getString(jsonKey)) ||
-                            map.get(country).getString(jsonKey).equals(map.get("en").getString(jsonKey))) {
-                        XSSFCellStyle style = workbook.createCellStyle();
-                        style.setFillForegroundColor((short) 40);
-                        style.setFillPattern(SOLID_FOREGROUND);
-                        cellValue.setCellStyle(style);
-                    }
-                }
-            }
-            System.out.println("jsonValueList is "+jsonValueList);
-        }
 
 //            for (int j = 0; j < entry.getValue().size(); j++) {
 ////                System.out.println("entry.getValue().size()"+entry.getValue().size()+"key"+entry.getKey());
@@ -113,6 +94,50 @@ public class ExcelHelper {
 
 //        }
     }
+
+
+    //获取map<String,JSONObject>里面JSONObject所有jsoney的并集
+    public static Set<String> getAllJsonKeySet(Map<String,JSONObject> stringMap){
+        Set<String> allJsonKeysSet = new HashSet<String>();
+        for (JSONObject jb : stringMap.values()) {
+            Iterator iterator = jb.keys();
+            while (iterator.hasNext()) {
+                String jsonKey = (String) iterator.next();
+                allJsonKeysSet.add(jsonKey);
+            }
+        }
+        return allJsonKeysSet;
+    }
+    //获取map<String,JSONObject>里面所有mapKey
+    public static List<String> getMapKeys(Map<String, JSONObject> stringMap) {
+        List mapKeyList = new ArrayList();
+        for (String mapKey : stringMap.keySet()) {
+            mapKeyList.add(mapKey);
+        }
+        return mapKeyList;
+    }
+    public static List<List<String>> getAllJsonLists(Map<String, JSONObject> stringMap) throws JSONException {
+        Set<String> allJsonKeysSet = ExcelHelper.getAllJsonKeySet(stringMap);
+        List<String> mapKeyList = ExcelHelper.getMapKeys(stringMap);
+        List<List<String>> allJsonValueLists = new ArrayList<List<String>>();
+        for(String jsonKey:allJsonKeysSet){
+            List<String> jsonValueList = new ArrayList<String>();
+            for(String mapKey:mapKeyList){
+                if(!stringMap.get(mapKey).isNull(jsonKey)){
+                    jsonValueList.add(stringMap.get(mapKey).getString(jsonKey));
+                }else {
+                    jsonValueList.add("N/A");
+                }
+            }
+            jsonValueList.add(0,jsonKey);
+            allJsonValueLists.add(jsonValueList);
+        }
+        return allJsonValueLists;
+    }
+
+
+
+
 
     @Test
     public void testJSONObject() throws JSONException {
