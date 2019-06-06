@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -48,8 +49,9 @@ public class StringsHelper {
 
     //todo 各个国家的key不一致！！！！！！！
     //MHLocalizableStrings 产品，对string进行处理，提取符合要求的base串，提取key提取json串
-    public static List<JSONObject> getBaseJsonList(String fileStringResult, List<String> baseKeyList) throws JSONException {
-        List<JSONObject> baseJsonList = new ArrayList<JSONObject>();
+    public static Map<String,JSONObject> parseStringBaseToMap(String fileStringResult) throws JSONException {
+//        List<JSONObject> baseJsonList = new ArrayList<JSONObject>();
+        Map<String,JSONObject> stringMap = new HashMap<String, JSONObject>();
         String start = fileStringResult.substring(fileStringResult.indexOf("const"), fileStringResult.indexOf("export")).trim();
         String[] strArr = start.split("const ");
         for (String str : strArr) {
@@ -64,8 +66,7 @@ public class StringsHelper {
                     }
                     baseMapValue = baseMapValue + "}";
                     JSONObject baseObject = new JSONObject(baseMapValue);
-                    baseKeyList.add(baseKey);
-                    baseJsonList.add(baseObject);
+                    stringMap.put(baseKey,baseObject);
                 } else {
                     LOGGER.info("current str is not match");
                     }
@@ -73,9 +74,10 @@ public class StringsHelper {
                 LOGGER.info("this current str is null，continue");
             }
         }
-        LOGGER.info("baseKeyList size is {},list is {}",baseKeyList.size(),baseKeyList);
-        LOGGER.info("baseJsonList size is {},list  is {}",baseJsonList.size(),baseJsonList);
-        return baseJsonList;
+        for(Map.Entry<String,JSONObject> entry:stringMap.entrySet()) {
+            LOGGER.info("key is {},value is {}",entry.getKey(),entry.getValue());
+        }
+        return stringMap;
     }
 
     public static void getAllJsonKeys(JSONObject jsonObject, Set<String> keySet) {
@@ -92,7 +94,7 @@ public class StringsHelper {
 
 
     //用于提取export后面的内容，主要用于空净产品
-    public static JSONObject parseStringsToJson(String fileStringResult, Set<String> keySet) throws JSONException {
+    public static JSONObject parseStringsToJson(String fileStringResult) throws JSONException {
         if (fileStringResult != null && fileStringResult.contains("{")) {
             String start = fileStringResult.substring(fileStringResult.indexOf("{"), fileStringResult.lastIndexOf("}")).trim();
             if (start.endsWith(",")) {
@@ -105,7 +107,7 @@ public class StringsHelper {
             Iterator iterator = jsonObject.keys();
             while (iterator.hasNext()) {
                 String jsonKey = (String) iterator.next();
-                keySet.add(jsonKey);
+//                keySet.add(jsonKey);
             }
             return jsonObject;
         } else {

@@ -82,10 +82,6 @@ public class FileHelper {
         System.out.println(deleteDir(path));
 
     }
-
-
-
-
 @Test
     public void test01(){
         String path = "/Users/huamiumiu/Desktop/rn框架";

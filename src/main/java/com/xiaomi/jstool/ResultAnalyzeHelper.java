@@ -122,26 +122,26 @@ public class ResultAnalyzeHelper {
      */
     public List getJsonValueList(List jsonKeyList, Map<String, JSONObject> map, List mapKeyList, String allOutputPath) throws JSONException, IOException {
         List<List<String>> jsonValueListOutput = new ArrayList<List<String>>();
-        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(allOutputPath,true),"UTF-8");
-        BufferedWriter writer = new BufferedWriter(outputStreamWriter);
+//        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(allOutputPath,true),"UTF-8");
+//        BufferedWriter writer = new BufferedWriter(outputStreamWriter);
 //        BufferedWriter writer = new BufferedWriter(new FileWriter(allOutputPath, true));
-        writer.write("name,");
+//        writer.write("name,");
         for (int n = 0; n < mapKeyList.size(); n++) {
-            writer.write(mapKeyList.get(n).toString() + ",");
+//            writer.write(mapKeyList.get(n).toString() + ",");
         }
-        writer.newLine();
+//        writer.newLine();
 
         for (int m = 0; m < jsonKeyList.size(); m++) {
             List jsonValueList = new ArrayList();
             //TODO 对当前整个文件的数据落盘输出
-            writer.write(jsonKeyList.get(m).toString() + ",");
+//            writer.write(jsonKeyList.get(m).toString() + ",");
             for (int n = 0; n < mapKeyList.size(); n++) {
                 String jsonValue = map.get(mapKeyList.get(n)).getString(jsonKeyList.get(m).toString());
                 jsonValueList.add(jsonValue + ",");
-                writer.write(jsonValue);
+//                writer.write(jsonValue);
             }
-            writer.newLine();
-            writer.flush();
+//            writer.newLine();
+//            writer.flush();
             //把jsonKey给设置进去，方便输出到文件
             jsonValueList.add(0, jsonKeyList.get(m));
             jsonValueListOutput.add(jsonValueList);
