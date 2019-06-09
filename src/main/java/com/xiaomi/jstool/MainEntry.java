@@ -26,14 +26,24 @@ public class MainEntry {
     //用于存储base里面的所有国家
     public static void main(String[] args) throws IOException, JSONException {
 //        String filePath = args[0];
-        String filePath = "/Users/huamiumiu/Desktop/rn框架/LocalizedStrings";
+//        String filePath = "D:\\Miot\\MHLocalizableString.js";
+        String filePath = "D:\\Miot\\LocalizedStrings";
+//        String filePath = "D:\\Miot\\空净pro 台湾";
+//        String filePath = "/Users/huamiumiu/Desktop/rn框架/LocalizedStrings";
 //        String filePath="/Users/huamiumiu/Desktop/rn框架/pro";
 //        String filePath = "/Users/huamiumiu/Desktop/rn框架/MHLocalizableString.js";
         List<File> fileList = new ArrayList();
         ResultAnalyzeHelper resultAnalyzeHelper = new ResultAnalyzeHelper();
 
         File dataFile = new File(filePath);
-        String basePath = fixPath(dataFile.getParentFile().toString() + "/report/");
+        String report = "/report/";
+        if(isOsWindows()){
+             report = fixPath(report);
+            System.out.println("report= "+report);
+           report= report.substring(report.indexOf(":")).replace(":","").trim().replace("/","\\");
+            System.out.println("report2="+report);
+        }
+        String basePath = fixPath(dataFile.getParentFile().toString() + report);
         String resultPath = fixPath(basePath + "result.xls");
         String failResultPath = fixPath(basePath + "failResult.txt");
         FileHelper.createFile(fixPath(resultPath));
@@ -67,13 +77,21 @@ public class MainEntry {
                     List<Map<String, JSONObject>> mapList = new ArrayList();
                     String zh = "zh";
                     String en = "en";
-                    String outputPath = fixPath(basePath + file.getName().replace(".js", "") + ".xls");
+                    String outputPath = fixPath(basePath + file.getName().replace(".js", "") );
                     //将字符串按照格式，划分为stringsList,zhHantList
                     StringsHelper.convertStringFileToListFile(stringsList, zhHantList, fileStringResult, exportStringsMap);
                     resultAnalyzeHelper.convertStringAndZhhantToMap(zhHantList, stringsList, mapList, exportStringsMap);
                     //落盘所有普通数据
-                    for (Map<String, JSONObject> map : mapList) {
-                        ExcelHelper.fillExcelWithColor(map, file.getName(), outputPath);
+                    if(mapList.size()>1) {
+                        for (int k = 0; k < mapList.size(); k++) {
+                            Map<String,JSONObject> map = mapList.get(k);
+                            outputPath =outputPath+ k+".xls";
+                            ExcelHelper.fillExcelWithColor(map, file.getName(), outputPath);
+                            outputPath = fixPath(basePath + file.getName().replace(".js", "") );
+                        }
+                    }else {
+                        outputPath += ".xls";
+                        ExcelHelper.fillExcelWithColor(mapList.get(0), file.getName(), outputPath);
                     }
                     resultAnalyzeHelper.outputFailResult(failResultsOfAllMaps, mapList, file, outputPath, zh, en);
                 }
@@ -83,7 +101,7 @@ public class MainEntry {
 
         //针对多个localizedStrings 下多个文件的（一个文件里面包含多个国家）
         if (failResultsOfAllMaps.size() != 0) {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(failResultPath, false), "UTF-8");
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(failResultPath, false));
             BufferedWriter writer0 = new BufferedWriter(outputStreamWriter);
             for (Map.Entry<File, HashMap<String, JSONObject>> entry : failResultsOfAllMaps.entrySet()) {
 //                LOGGER.info("file is {},fail result is {}", entry.getKey(), entry.getValue());
