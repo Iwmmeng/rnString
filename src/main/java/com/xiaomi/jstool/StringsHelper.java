@@ -26,7 +26,7 @@ public class StringsHelper {
         LOGGER.info("file is {}", file);
         String fileStringResult = null;
 //        File file = new File(filePath);
-        InputStreamReader isReader = new InputStreamReader(new FileInputStream(file));
+        InputStreamReader isReader = new InputStreamReader(new FileInputStream(file),"UTF-8");
         BufferedReader reader = new BufferedReader(isReader);
         StringBuilder sb = new StringBuilder();
         String line = null;
@@ -39,6 +39,7 @@ public class StringsHelper {
             } else if (line.indexOf(":") > 0 && (!line.trim().startsWith("\""))) {
                 line = ("\"" + line.trim().replaceFirst(":", "\":").trim()).replace("\u00a0", "").replace("\\n","");
             }
+//            line.replace("\\n","");
             sb.append(line.trim());
         }
         reader.close();
@@ -213,9 +214,11 @@ public class StringsHelper {
             for (int m = 0; m < foreignList.size(); m++) {
 //                JSONObject jsonObject = new JSONObject();
                 String foreignString = foreignList.get(m).toString();
+//                LOGGER.info("foreignString is {}",foreignString);
                 //取地域
                 String mapKey = foreignString.substring(0, foreignString.indexOf(":{")).replace("\"", "").trim();
-                String valueString = foreignString.substring(foreignString.indexOf(":{")).replace(":{", "{").trim();
+                String valueString = foreignString.substring(foreignString.indexOf(":{")).replaceFirst(":", "").trim();
+//                LOGGER.info("valueString is {}",valueString);
                 JSONObject mapObject = new JSONObject(valueString);
                 stringsMap.put(mapKey, mapObject);
             }

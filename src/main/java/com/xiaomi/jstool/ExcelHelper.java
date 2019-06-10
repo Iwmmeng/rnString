@@ -323,6 +323,35 @@ public class ExcelHelper {
         System.out.println(jb);
     }
 
+//    @Test
+//    public void testJson(){
+//        String value = "{\"title\": \"Historia\",\"unit_score\": \"punkt\",\"unit_score_s\": \"punkt贸w\",\"dateUnit_year\": \"Rok\",\"dateUnit_month\": \"Miesi膮c\",\"dateUnit_d\n" +
+//                "ay\": \"Dzie艅\",\"dateUnit_week\": \"Tydzie艅\",\"dateUnit_minute\": \"min\",\"dateUnit_second\": \"s\",\"standardUnit_high\": \"Wysoki\",\"standardUnit_medium\": \"艢redni\",\"standardUnit_low\": \"Niski\",\"tip_inGetData\": \"Pobiera\n" +
+//                "m dane...\",\"tip_inLoadingData\": \"Wczytywanie...\",\"tip_networkError\": \"Pod艂膮cz do sieci i kliknij, aby od艣wie偶y膰.\",\"tip_noBrushData\": \"Brak danych szczotkowania\",\"day_brushTime_str1\": \"Czas szczotkowani\n" +
+//                "a\",\"day_brushTime_str2\": \"Szczotkowanie przez {var0} min i {var1} s\",\"day_coverage_str1\": \"Pokrycie\",\"day_coverage_str2\": \"Pokrycie szczotkowania: \",\"day_uniformityRate_str1\": \"R贸wnomierno艣膰\",\"day_unifor\n" +
+//                "mityRate_str2\": \"R贸wnomierno艣膰 szczotkowania: \",\"avgScore\": \"艢redni wynik\",\"week_report_notGenerated_singular\": \"{var0} dzie艅 do nast臋pnego raportu tygodniowego\",\"week_report_notGenerated\": \"{var0} dn\n" +
+//                "i do nast臋pnego raportu tygodniowego\",\"week_report_noData\": \"Zbyt ma艂o danych. Nie mo偶na wygenerowa膰 tygodniowego raportu.\",\"week_report_hasGenerated\": \"Wygenerowano tygodniowy raport dentystyczny\",\"wee\n" +
+//                "k_reportDesc_str1\": \"Pami臋taj, aby my膰 z臋by dwa razy dziennie.\",\"week_reportDesc_str2\": \"Szczotkuj dalej! Wkr贸tce zobaczysz rezultaty.\",\"week_reportDesc_str3\": \"Szczotkujesz z臋by regularnie\",\"week_repo\n" +
+//                "rtDesc_str4\": \"W tym tygodniu rzadziej szczotkujesz z臋by. Szybko mo偶e pojawi膰 si臋 kamie艅 naz臋bny i p艂ytka naz臋bna\",\"month_report_notGenerated_singular\": \"{var0} dzie艅 do nast臋pnego raportu miesi臋\n" +
+//                "cznego\",聽\"month_report_notGenerated\": \"{var0} dni do nast臋pnego raportu miesi臋cznego\",聽\"month_report_noData\": \"Zbyt ma艂o danych. Nie mo偶na wygenerowa膰 miesi臋cznego raportu.\",\"month_report_hasGenerat\n" +
+//                "ed\": \"Wygenerowano miesi臋czny raport dentystyczny\",\"month_report_str1\": \"Pami臋taj, aby my膰 z臋by dwa razy dziennie.\",\"month_report_str2\": \"Szczotkuj dalej! Wkr贸tce zobaczysz rezultaty.\",\"month_report_st\n" +
+//                "r3\": \"Szczotkujesz z臋by regularnie\",\"month_report_str4\": \"W tym miesi膮cu szczotkujesz rzadziej ni偶 zwykle. Mo偶e szybko pojawi膰 si臋 p艂ytka naz臋bna.\",\"share_title\": \"Mi Electric Toothbrush\",\"share_con\n" +
+//                "tent\": \"Teraz mam wspania艂y u艣miech. To m贸j wynik dla szczoteczki #Mi Electric Toothbrush#. Zobacz\"}";
+//        String sub = value.substring(value.indexOf("dateUnit_month"),value.indexOf("dateUnit_week"));
+////        System.out.println(sub);
+//
+//        String s= "\"dateUnit_d\n" +
+//                "ay\"";
+//        char s1='\n';
+//        byte ss1 = (byte)(s1);
+//        System.out.println(ss1);
+//
+//        char s2='\n';
+//        System.out.println((byte)s2);
+//
+//
+//    }
+
 
 }
 

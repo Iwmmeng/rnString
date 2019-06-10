@@ -41,9 +41,10 @@ public class FileHelper {
             FileHelper.createDir(file.getParentFile().toString());
         }else {
             //todo 删除该文件夹！！！！！！
-            LOGGER.info("目标文件所在目录已存在，删除，再重新创建");
-            deleteDir(file.getParentFile());
-            FileHelper.createDir(file.getParentFile().toString());
+            Boolean flag1 = deleteDir(file.getParentFile());
+LOGGER.info("删除目标文件所在的目录 is true ? {}",flag1);
+            Boolean flag2= FileHelper.createDir(file.getParentFile().toString());
+            LOGGER.info("重新创建目录 is true ? {}",flag2);
         }
         //创建目标文件
         try {

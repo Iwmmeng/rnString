@@ -25,10 +25,10 @@ public class MainEntry {
     public static Map<String, JSONObject> stringMap = new HashMap<String, JSONObject>();
     //用于存储base里面的所有国家
     public static void main(String[] args) throws IOException, JSONException {
-//        String filePath = args[0];
+        String filePath = args[0];
 //        String filePath = "D:\\Miot\\MHLocalizableString.js";
-        String filePath = "D:\\Miot\\LocalizedStrings";
-//        String filePath = "D:\\Miot\\空净pro 台湾";
+//        String filePath = "D:\\Miot\\LocalizedStrings";
+//        String filePath = "D:\\Miot\\空净pro台湾";
 //        String filePath = "/Users/huamiumiu/Desktop/rn框架/LocalizedStrings";
 //        String filePath="/Users/huamiumiu/Desktop/rn框架/pro";
 //        String filePath = "/Users/huamiumiu/Desktop/rn框架/MHLocalizableString.js";
@@ -86,11 +86,13 @@ public class MainEntry {
                         for (int k = 0; k < mapList.size(); k++) {
                             Map<String,JSONObject> map = mapList.get(k);
                             outputPath =outputPath+ k+".xls";
+//                            FileHelper.createFile(outputPath);
                             ExcelHelper.fillExcelWithColor(map, file.getName(), outputPath);
                             outputPath = fixPath(basePath + file.getName().replace(".js", "") );
                         }
                     }else {
                         outputPath += ".xls";
+//                        FileHelper.createFile(outputPath);
                         ExcelHelper.fillExcelWithColor(mapList.get(0), file.getName(), outputPath);
                     }
                     resultAnalyzeHelper.outputFailResult(failResultsOfAllMaps, mapList, file, outputPath, zh, en);
